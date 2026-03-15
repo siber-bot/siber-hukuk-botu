@@ -22,8 +22,7 @@ with st.sidebar:
     Bu yapay zeka prototipi, siber vakaların hukuki ve teknik analizini yapmak üzere tasarlanmıştır.
     
     **Geliştiriciler:**
-    * Merve [Soyadı]
-    * [Senin Adın]
+    * Merve Havuz
     
     ---
     **⚠️ YASAL UYARI:**
