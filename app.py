@@ -12,7 +12,7 @@ st.set_page_config(
     page_title="Siber Hukuk Asistanı",
     page_icon="⚖️",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded"   # expanded kalabilir, buton her durumda görünecek
 )
 
 # ==========================================
@@ -33,41 +33,78 @@ def save_db(data):
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 # ==========================================
-# 3. ÖZEL CSS: BUTON VE MENÜ GARANTİSİ
+# 3. ÖZEL CSS
 # ==========================================
 st.markdown("""
 <style>
-    /* ÜST BARI (HEADER) ŞEFFAFLAŞTIR AMA SAKIN GİZLEME (Butonun yaşam alanı burası) */
+    /* ── HEADER: şeffaf ama var ── */
     header[data-testid="stHeader"] {
-        background: rgba(255, 255, 255, 0) !important;
-        color: #3B82F6 !important;
-    }
-    
-    /* Orijinal menü açma butonunu (Hamburger) belirgin yap */
-    button[data-testid="stSidebarCollapseButton"] {
-        background-color: #FFFFFF !important;
-        border: 1px solid #E2E8F0 !important;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
-        color: #3B82F6 !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08) !important;
+        z-index: 999 !important;
     }
 
-    /* Gereksiz sağ üst menüleri gizle */
+    /* ── SİDEBAR AÇMA/KAPAMA BUTONU: TÜM OLASI SELECTOR'LAR ──
+       Streamlit farklı sürümlerde farklı test-id kullanıyor,
+       hepsini kapsıyoruz.                                       */
+    button[data-testid="stSidebarCollapseButton"],
+    button[data-testid="collapsedControl"],
+    [data-testid="stSidebarCollapsedControl"] button,
+    section[data-testid="stSidebarCollapsedControl"] {
+        display:           flex         !important;
+        visibility:        visible      !important;
+        opacity:           1            !important;
+        pointer-events:    all          !important;
+        position:          fixed        !important;
+        top:               12px         !important;
+        left:              12px         !important;
+        z-index:           100000       !important;
+        background-color:  #3B82F6      !important;
+        border:            none         !important;
+        border-radius:     10px         !important;
+        width:             42px         !important;
+        height:            42px         !important;
+        box-shadow:        0 3px 10px rgba(59,130,246,0.45) !important;
+        color:             #FFFFFF      !important;
+        align-items:       center       !important;
+        justify-content:   center       !important;
+        cursor:            pointer      !important;
+        transition:        all 0.2s ease !important;
+    }
+
+    button[data-testid="stSidebarCollapseButton"]:hover,
+    button[data-testid="collapsedControl"]:hover,
+    [data-testid="stSidebarCollapsedControl"] button:hover {
+        background-color: #2563EB !important;
+        transform: scale(1.08) !important;
+    }
+
+    /* Butonun içindeki SVG ikonunu beyaz yap */
+    button[data-testid="stSidebarCollapseButton"] svg,
+    button[data-testid="collapsedControl"] svg,
+    [data-testid="stSidebarCollapsedControl"] button svg {
+        fill:   white !important;
+        stroke: white !important;
+        color:  white !important;
+    }
+
+    /* ── TOOLBAR (sağ üst menü) gizle ── */
     [data-testid="stToolbar"] { display: none !important; }
 
-    /* ANA KONTEYNER AYARLARI */
+    /* ── ANA KONTEYNER ── */
     .block-container { 
         padding-top: 2rem !important; 
         max-width: 850px !important; 
         margin: 0 auto !important; 
     }
 
-    /* SİDEBAR TASARIMI */
+    /* ── SİDEBAR ── */
     [data-testid="stSidebar"] { 
         background-color: #F8FAFC !important; 
         border-right: 1px solid #E2E8F0 !important;
     }
 
-    /* BAŞLIK (TIKLANAMAZ) */
+    /* ── BAŞLIK ── */
     .portal-title {
         text-align: center;
         font-weight: 800;
@@ -77,7 +114,7 @@ st.markdown("""
         margin-top: 1rem;
     }
 
-    /* SOHBET LİSTESİ - İNOVATİF VE RESMİ */
+    /* ── SOHBET LİSTESİ BUTONLARI ── */
     div[data-testid="stVerticalBlock"] div.stButton > button {
         text-align: left !important;
         width: 100% !important;
@@ -121,7 +158,7 @@ if "edit_id" not in st.session_state:
     st.session_state.edit_id = None
 
 # ==========================================
-# 6. SOL MENÜ (RESMİ VE İNOVATİF)
+# 6. SOL MENÜ
 # ==========================================
 with st.sidebar:
     st.markdown("<h3 style='color:#0F172A; margin-top:0;'>⚖️ Siber Asistan</h3>", unsafe_allow_html=True)
@@ -140,7 +177,6 @@ with st.sidebar:
 
     st.markdown("<p style='font-size:0.65rem; color:#94A3B8; font-weight:700; margin-top:20px; margin-bottom:10px;'>GEÇMİŞ ANALİZLER</p>", unsafe_allow_html=True)
     
-    # Geçmiş Sohbetleri Yönet
     t_db = db.copy()
     for cid in sorted(t_db.keys(), reverse=True):
         if st.session_state.edit_id == cid:
