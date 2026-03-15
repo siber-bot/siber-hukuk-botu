@@ -1,79 +1,97 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. API Ayarları (Secrets'dan çeker)
+# 1. API Ayarları
 API_KEY = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel('gemini-1.5-flash') # En hızlı ve güncel ücretsiz model
+model = genai.GenerativeModel('gemini-1.5-flash')
 
-# 2. Sayfa Konfigürasyonu (Tasarım Ayarları)
+# 2. ChatGPT/Gemini Tarzı Sade Arayüz Ayarları
 st.set_page_config(
     page_title="Siber Hukuk Asistanı", 
     page_icon="⚖️", 
-    layout="centered"
+    layout="wide" # Geniş ekran, daha modern durur
 )
 
-# --- TASARIM: Sidebar (Yan Menü) ---
+# --- CSS İLE ÖZEL MAKYAJ (Sadelik İçin) ---
+st.markdown("""
+    <style>
+    /* Üstteki Streamlit menülerini gizle */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    
+    /* Mesaj alanını ortala ve genişliğini ayarla */
+    .block-container {
+        max-width: 800px;
+        padding-top: 2rem;
+    }
+    
+    /* Başlık stilini sadeleştir */
+    .main-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 2rem;
+        color: #FFFFFF;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# --- SIDEBAR (Minimalist) ---
 with st.sidebar:
-    st.title("🛡️ Proje Künyesi")
+    st.markdown("### ⚖️ Siber Hukuk Asistanı")
+    st.caption("Versiyon 2.0 | Akademik Proje")
+    st.divider()
     st.markdown("""
-    **Siber Hukuk Asistanı v2.0**
-    
-    Bu yapay zeka prototipi, siber vakaların hukuki ve teknik analizini yapmak üzere tasarlanmıştır.
-    
     **Geliştiriciler:**
-    * Merve Havuz
-    
-    ---
-    **⚠️ YASAL UYARI:**
-    Bu asistan bir avukat değildir. Sunulan bilgiler bilgilendirme amaçlıdır ve resmi bir tavsiye niteliği taşımaz.
+    - Merve [Soyadı]
+    - [Senin Adın]
     """)
     st.divider()
-    st.write("📌 *Hukuki süreçlerde mutlaka bir avukata danışınız.*")
+    st.warning("Hukuki danışmanlık değildir. Bilgilendirme amaçlıdır.")
+    if st.button("Sohbeti Temizle"):
+        st.session_state.messages = []
+        st.rerun()
 
-# --- ANA SAYFA TASARIMI ---
-st.title("Siber Hukuk Ajanı ⚖️")
-st.subheader("Bilişim Suçları ve KVKK Analiz Sistemi")
-st.info("Aşağıdaki kutucuğa siber hukukla ilgili bir soru yazabilir veya başınızdan geçen bir vakayı anlatabilirsiniz.")
+# --- ANA EKRAN ---
+st.markdown('<p class="main-title">Siber Hukuk Asistanı</p>', unsafe_allow_html=True)
 
-# Mesaj Geçmişini Başlat (Hafıza için)
+# Mesaj Geçmişi Başlatma
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Eski mesajları ekrana bas
+# Mesajları Ekrana Basma (Avatar kullanarak daha şık görünüm)
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# --- SOHBET VE ZEKÂ MANTIĞI ---
-if prompt := st.chat_input("Hukuki sorunuzu buraya yazın..."):
-    # Kullanıcı mesajını ekrana bas ve hafızaya al
+# --- SOHBET GİRİŞİ ---
+if prompt := st.chat_input("Nasıl yardımcı olabilirim?"):
+    # Kullanıcı mesajı
+    st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
-    st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # SİSTEM TALİMATI: Gemini'ye nasıl davranması gerektiğini söylüyoruz
-    sistem_mesaji = f"""
-    Sen uzman bir Siber Hukuk Asistanısın. Cevaplarını şu kurallara göre ver:
-    1. FORMAT: Olay Analizi, Hukuki Risk ve Teknik Çözüm adımlarıyla cevapla.
-    2. KISALIK: Cevapları %40 oranında kısalt, öz bilgi ver. Uzun cümlelerden kaçın.
-    3. TÜRKİYE ODAKLI: USOM, BTK, KVKK Kurumu ve TCK maddelerine (m. 243, 244 vb.) atıf yap.
-    4. TON: Profesyonel, ciddi ve yol gösterici ol.
-    5. TEKRAR: Her mesajda 'avukat değilim' deme (sidebar'da zaten yazıyor).
+    # Gemini Zekâ Komutları (Prompt Engineering)
+    sistem_talimati = f"""
+    Sen uzman bir Siber Hukuk Asistanısın. Cevaplarını ChatGPT/Gemini tarzında, 
+    son derece sade, anlaşılır ve profesyonel ver. 
+    - Gereksiz giriş-sonuç cümlelerini at.
+    - Olayı Analiz, Riskler ve Öneriler şeklinde kısa maddelerle açıkla.
+    - Türkiye hukukuna (TCK, KVKK) ve kurumlarına (USOM, BTK) odaklan.
+    - Her mesajda yasal uyarı yapma (sidebar'da mevcut).
     
-    Kullanıcı Sorusu: {prompt}
+    Soru: {prompt}
     """
 
+    # Asistan cevabı
     with st.chat_message("assistant"):
-        with st.spinner("Analiz ediliyor..."):
+        with st.spinner(""): # Sade bir bekleme simgesi
             try:
-                response = model.generate_content(sistem_mesaji)
+                response = model.generate_content(sistem_talimati)
                 full_response = response.text
                 st.markdown(full_response)
                 st.session_state.messages.append({"role": "assistant", "content": full_response})
             except Exception as e:
-                st.error("Bir hata oluştu. Lütfen tekrar deneyin.")
-
-# Alt Bilgi (Footer)
-st.markdown("---")
-st.caption("© 2026 Siber Hukuk AI Projesi | Streamlit & Gemini Cloud")
+                st.error("Bir hata oluştu, lütfen tekrar deneyin.")
