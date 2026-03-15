@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import google.generativeai as genai
 import time
 import json
@@ -40,11 +41,13 @@ st.markdown("""
     /* ── TOOLBAR (sağ üst menü) gizle ── */
     [data-testid="stToolbar"] { display: none !important; }
 
-    /* ── Streamlit'in kendi sidebar butonunu gizle (biz kendi butonumuzu enjekte edeceğiz) ── */
+    /* ── Streamlit'in kendi sidebar butonunu gizle ── */
     button[data-testid="stSidebarCollapseButton"],
     button[data-testid="collapsedControl"],
-    [data-testid="stSidebarCollapsedControl"] {
+    [data-testid="stSidebarCollapsedControl"],
+    [data-testid="stSidebarCollapsedControl"] button {
         display: none !important;
+        visibility: hidden !important;
     }
 
     /* ── CUSTOM FLOATING TOGGLE BUTTON ── */
@@ -120,50 +123,59 @@ st.markdown("""
     }
 </style>
 
-<!-- FLOATING HAMBURGER BUTTON -->
-<button id="custom-menu-btn" title="Menüyü Aç/Kapat">
-    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <rect y="4"  width="24" height="2.5" rx="1.5"/>
-        <rect y="11" width="24" height="2.5" rx="1.5"/>
-        <rect y="18" width="24" height="2.5" rx="1.5"/>
-    </svg>
+""", unsafe_allow_html=True)
+
+# Sidebar toggle butonu — components.v1.html parent frame'e erişebildiği için çalışır
+components.html("""
+<style>
+  #menu-btn {
+    position: fixed;
+    top: 14px; left: 14px;
+    z-index: 999999;
+    width: 44px; height: 44px;
+    background: #3B82F6;
+    border: none; border-radius: 12px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 14px rgba(59,130,246,0.5);
+    transition: background 0.2s, transform 0.15s;
+  }
+  #menu-btn:hover { background: #2563EB; transform: scale(1.08); }
+  #menu-btn svg { width: 22px; height: 22px; fill: white; }
+</style>
+
+<button id="menu-btn" title="Menü">
+  <svg viewBox="0 0 24 24"><rect y="4" width="24" height="2.5" rx="1.2"/><rect y="11" width="24" height="2.5" rx="1.2"/><rect y="18" width="24" height="2.5" rx="1.2"/></svg>
 </button>
 
 <script>
-(function() {
-    function toggleSidebar() {
-        // Streamlit'in sidebar'ını bulmak için birden fazla yol dene
-        const selectors = [
-            'button[data-testid="stSidebarCollapseButton"]',
-            'button[data-testid="collapsedControl"]',
-            '[data-testid="stSidebarCollapsedControl"] button'
-        ];
-        for (const sel of selectors) {
-            const btn = window.parent.document.querySelector(sel);
-            if (btn) { btn.click(); return; }
-        }
-        // Buton bulunamazsa sidebar section'ına class toggle yap
-        const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
-        if (sidebar) {
-            const isHidden = sidebar.style.marginLeft === '0px' || sidebar.style.marginLeft === '';
-            sidebar.style.transition = 'margin-left 0.3s ease';
-            sidebar.style.marginLeft = isHidden ? '-350px' : '0px';
-        }
+  let open = true;
+
+  document.getElementById('menu-btn').addEventListener('click', function() {
+    const doc = window.parent.document;
+
+    // Yöntem 1: Streamlit'in kendi toggle butonunu bul ve tıkla
+    const btnSelectors = [
+      '[data-testid="stSidebarCollapseButton"]',
+      '[data-testid="collapsedControl"]',
+      '[data-testid="stSidebarCollapsedControl"] button',
+      'section[data-testid="stSidebarCollapsedControl"]',
+    ];
+    for (const sel of btnSelectors) {
+      const el = doc.querySelector(sel);
+      if (el) { el.click(); return; }
     }
 
-    // Buton DOM'a eklendikten sonra event'i bağla
-    function attachBtn() {
-        const btn = document.getElementById('custom-menu-btn');
-        if (btn) {
-            btn.addEventListener('click', toggleSidebar);
-        } else {
-            setTimeout(attachBtn, 200);
-        }
+    // Yöntem 2: Sidebar'ı transform ile gizle/göster
+    const sidebar = doc.querySelector('[data-testid="stSidebar"]');
+    if (sidebar) {
+      sidebar.style.transition = 'transform 0.3s ease';
+      open = !open;
+      sidebar.style.transform = open ? 'translateX(0)' : 'translateX(-110%)';
     }
-    attachBtn();
-})();
+  });
 </script>
-""", unsafe_allow_html=True)
+""", height=0)
 
 # ==========================================
 # 4. API VE MODEL
