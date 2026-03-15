@@ -45,7 +45,7 @@ try:
     genai.configure(api_key=API_KEY)
     
     # Not: Eğer Google API bu isimlendirmeyi kabul etmezse hata fırlatacak.
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    model = genai.GenerativeModel('gemini-3.0-flash')
 except Exception as e:
     st.error(f"Sistem Başlatılamadı! Detay: {str(e)}")
     st.stop()
@@ -69,8 +69,8 @@ with st.sidebar:
     st.markdown("""
     <div class='info-box'>
     <b>Proje Geliştiricileri:</b><br>
-    👤 Merve [Soyadı]<br>
-    👤 [Senin Adın]
+    👤 Merve Havuz<br>
+    👤 
     </div>
     <div class='info-box' style='border-left-color: #10B981;'>
     <b>Aktif Model:</b> Gemini 3 Flash<br>
