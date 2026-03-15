@@ -33,63 +33,52 @@ def save_db(data):
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 # ==========================================
-# 3. ÖZEL CSS
+# 3. ÖZEL CSS + FLOATING MENU BUTTON
 # ==========================================
 st.markdown("""
 <style>
-    /* ── HEADER: şeffaf ama var ── */
-    header[data-testid="stHeader"] {
-        background: rgba(255, 255, 255, 0.95) !important;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.08) !important;
-        z-index: 999 !important;
-    }
-
-    /* ── SİDEBAR AÇMA/KAPAMA BUTONU: TÜM OLASI SELECTOR'LAR ──
-       Streamlit farklı sürümlerde farklı test-id kullanıyor,
-       hepsini kapsıyoruz.                                       */
-    button[data-testid="stSidebarCollapseButton"],
-    button[data-testid="collapsedControl"],
-    [data-testid="stSidebarCollapsedControl"] button,
-    section[data-testid="stSidebarCollapsedControl"] {
-        display:           flex         !important;
-        visibility:        visible      !important;
-        opacity:           1            !important;
-        pointer-events:    all          !important;
-        position:          fixed        !important;
-        top:               12px         !important;
-        left:              12px         !important;
-        z-index:           100000       !important;
-        background-color:  #3B82F6      !important;
-        border:            none         !important;
-        border-radius:     10px         !important;
-        width:             42px         !important;
-        height:            42px         !important;
-        box-shadow:        0 3px 10px rgba(59,130,246,0.45) !important;
-        color:             #FFFFFF      !important;
-        align-items:       center       !important;
-        justify-content:   center       !important;
-        cursor:            pointer      !important;
-        transition:        all 0.2s ease !important;
-    }
-
-    button[data-testid="stSidebarCollapseButton"]:hover,
-    button[data-testid="collapsedControl"]:hover,
-    [data-testid="stSidebarCollapsedControl"] button:hover {
-        background-color: #2563EB !important;
-        transform: scale(1.08) !important;
-    }
-
-    /* Butonun içindeki SVG ikonunu beyaz yap */
-    button[data-testid="stSidebarCollapseButton"] svg,
-    button[data-testid="collapsedControl"] svg,
-    [data-testid="stSidebarCollapsedControl"] button svg {
-        fill:   white !important;
-        stroke: white !important;
-        color:  white !important;
-    }
-
     /* ── TOOLBAR (sağ üst menü) gizle ── */
     [data-testid="stToolbar"] { display: none !important; }
+
+    /* ── Streamlit'in kendi sidebar butonunu gizle (biz kendi butonumuzu enjekte edeceğiz) ── */
+    button[data-testid="stSidebarCollapseButton"],
+    button[data-testid="collapsedControl"],
+    [data-testid="stSidebarCollapsedControl"] {
+        display: none !important;
+    }
+
+    /* ── CUSTOM FLOATING TOGGLE BUTTON ── */
+    #custom-menu-btn {
+        position:         fixed;
+        top:              14px;
+        left:             14px;
+        z-index:          999999;
+        width:            44px;
+        height:           44px;
+        background:       #3B82F6;
+        border:           none;
+        border-radius:    12px;
+        cursor:           pointer;
+        display:          flex;
+        align-items:      center;
+        justify-content:  center;
+        box-shadow:       0 4px 14px rgba(59,130,246,0.5);
+        transition:       background 0.2s, transform 0.2s;
+    }
+    #custom-menu-btn:hover {
+        background:  #2563EB;
+        transform:   scale(1.08);
+    }
+    #custom-menu-btn svg {
+        width:  22px;
+        height: 22px;
+        fill:   white;
+    }
+
+    /* ── HEADER şeffaf ── */
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+    }
 
     /* ── ANA KONTEYNER ── */
     .block-container { 
@@ -130,6 +119,50 @@ st.markdown("""
         color: #1E293B !important;
     }
 </style>
+
+<!-- FLOATING HAMBURGER BUTTON -->
+<button id="custom-menu-btn" title="Menüyü Aç/Kapat">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <rect y="4"  width="24" height="2.5" rx="1.5"/>
+        <rect y="11" width="24" height="2.5" rx="1.5"/>
+        <rect y="18" width="24" height="2.5" rx="1.5"/>
+    </svg>
+</button>
+
+<script>
+(function() {
+    function toggleSidebar() {
+        // Streamlit'in sidebar'ını bulmak için birden fazla yol dene
+        const selectors = [
+            'button[data-testid="stSidebarCollapseButton"]',
+            'button[data-testid="collapsedControl"]',
+            '[data-testid="stSidebarCollapsedControl"] button'
+        ];
+        for (const sel of selectors) {
+            const btn = window.parent.document.querySelector(sel);
+            if (btn) { btn.click(); return; }
+        }
+        // Buton bulunamazsa sidebar section'ına class toggle yap
+        const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+        if (sidebar) {
+            const isHidden = sidebar.style.marginLeft === '0px' || sidebar.style.marginLeft === '';
+            sidebar.style.transition = 'margin-left 0.3s ease';
+            sidebar.style.marginLeft = isHidden ? '-350px' : '0px';
+        }
+    }
+
+    // Buton DOM'a eklendikten sonra event'i bağla
+    function attachBtn() {
+        const btn = document.getElementById('custom-menu-btn');
+        if (btn) {
+            btn.addEventListener('click', toggleSidebar);
+        } else {
+            setTimeout(attachBtn, 200);
+        }
+    }
+    attachBtn();
+})();
+</script>
 """, unsafe_allow_html=True)
 
 # ==========================================
