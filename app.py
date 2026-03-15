@@ -5,107 +5,121 @@ import google.generativeai as genai
 # 1. SAYFA AYARLARI (EN BAŞTA OLMALI)
 # ==========================================
 st.set_page_config(
-    page_title="Siber Hukuk AI",
-    page_icon="🤖",
-    layout="wide", # Geniş ve ferah AI ekranı
+    page_title="Siber Hukuk Asistanı",
+    page_icon="⚖️",
+    layout="centered", # Okumayı kolaylaştırmak için ortalandı
     initial_sidebar_state="expanded"
 )
 
 # ==========================================
-# 2. CYBER-AI KONSEPTLİ CSS TASARIMI
+# 2. AYDINLIK VE KURUMSAL (LIGHT MODE) CSS TASARIMI
 # ==========================================
 st.markdown("""
 <style>
-/* Ana Arkaplan (Koyu Siber Uzay Rengi) */
-.stApp { background-color: #0A0E17 !important; color: #E2E8F0 !important; }
+/* Ana Arkaplan (Ferah Açık Gri/Beyaz) */
+.stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] { 
+    background-color: #F8FAFC !important; 
+    color: #1E293B !important; 
+}
 
-/* HEADER DÜZELTMESİ: Menü tuşu kalsın ama arka planı şeffaf olsun */
-[data-testid="stHeader"] { background-color: transparent !important; }
-[data-testid="stToolbar"] { display: none !important; } /* Sağ üstteki gereksiz menüyü gizle */
+/* Sağ üstteki gereksiz menüyü gizle */
+[data-testid="stToolbar"] { display: none !important; } 
 
-/* YAN MENÜ (Sidebar) Tasarımı */
-[data-testid="stSidebar"] { background-color: #111827 !important; border-right: 1px solid #1E293B !important; }
+/* YAN MENÜ (Sidebar) Tasarımı (Tam Beyaz) */
+[data-testid="stSidebar"] { 
+    background-color: #FFFFFF !important; 
+    border-right: 1px solid #E2E8F0 !important; 
+}
 
 /* ORTALAMA VE EKRAN DÜZENİ */
 .block-container {
-    max-width: 900px !important;
+    max-width: 800px !important;
     padding-top: 2rem !important;
     padding-bottom: 7rem !important;
     margin: 0 auto !important;
 }
 
-/* SİBER BAŞLIK TASARIMI (Neon Geçişli) */
-.cyber-title {
+/* KURUMSAL BAŞLIK TASARIMI */
+.legal-title {
     text-align: center;
-    font-size: 3.2rem;
-    font-weight: 900;
-    background: linear-gradient(90deg, #00F0FF, #5773FF, #BC13FE);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: #0F172A;
     margin-bottom: 0.2rem;
-    letter-spacing: -1px;
+    letter-spacing: -0.5px;
 }
-.cyber-subtitle {
-    text-align: center; color: #94A3B8; font-size: 1.1rem; margin-bottom: 3rem; letter-spacing: 1px;
+.legal-subtitle {
+    text-align: center; 
+    color: #64748B; 
+    font-size: 1.1rem; 
+    margin-bottom: 3rem; 
 }
 
-/* MESAJ BALONLARI (Holografik AI Hissi) */
+/* MESAJ BALONLARI (Ferah ve Okunaklı) */
 [data-testid="stChatMessage"] {
     background-color: transparent !important;
-    border: 1px solid #1E293B !important;
-    border-radius: 12px;
-    margin-bottom: 15px;
-    padding: 15px;
-}
-/* Kullanıcı Mesajı */
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
-    background-color: #1E293B !important; 
-    border-color: #334155 !important; 
-}
-/* AI Mesajı (Neon Mavi Çizgili) */
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
-    background-color: #0F172A !important; 
-    border-left: 3px solid #00F0FF !important; 
+    border: none !important;
+    padding: 0 !important;
+    margin-bottom: 20px !important;
 }
 
-/* CHAT GİRİŞ KUTUSU */
-[data-testid="stChatFloatingInputContainer"], [data-testid="stBottom"] { background-color: transparent !important; }
+/* Kullanıcı Mesajı (Açık Mavi Tonu, Sağa Dayalı Hissi) */
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) .stMarkdown {
+    background-color: #EFF6FF !important; 
+    color: #0F172A !important;
+    border: 1px solid #BFDBFE !important;
+    border-radius: 12px 12px 0 12px !important;
+    padding: 15px 20px !important;
+    display: inline-block !important;
+}
+
+/* AI Mesajı (Tam Beyaz, Hafif Gölgeli, Resmi Hissiyat) */
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) .stMarkdown {
+    background-color: #FFFFFF !important; 
+    color: #1E293B !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 12px 12px 12px 0 !important;
+    padding: 15px 20px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+    display: inline-block !important;
+}
+
+/* CHAT GİRİŞ KUTUSU (Temiz ve Belirgin) */
+[data-testid="stChatFloatingInputContainer"], [data-testid="stBottom"] { 
+    background-color: transparent !important; 
+}
 [data-testid="stChatInput"] { 
-    background-color: #1E293B !important; 
-    border: 1px solid #334155 !important; 
-    border-radius: 16px !important; 
+    background-color: #FFFFFF !important; 
+    border: 1px solid #CBD5E1 !important; 
+    border-radius: 12px !important; 
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
 }
 [data-testid="stChatInput"]:focus-within { 
-    border-color: #00F0FF !important; 
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2) !important; 
+    border-color: #3B82F6 !important; 
 }
-textarea { color: #F8FAFC !important; }
+textarea { color: #0F172A !important; }
 
-/* SİSTEM DURUM KUTULARI (Sol Menü İçin) */
-.status-box {
-    background: #1E293B; padding: 12px; border-radius: 8px; 
-    border-left: 3px solid #10B981; font-size: 0.85rem; margin-bottom: 10px; color: #E2E8F0;
-}
-.warning-box {
-    background: #450A0A; padding: 12px; border-radius: 8px; 
-    border-left: 3px solid #EF4444; font-size: 0.8rem; color: #FCA5A5;
+/* BİLGİ KUTULARI (Sol Menü İçin) */
+.info-box {
+    background: #F1F5F9; padding: 12px; border-radius: 8px; 
+    border-left: 3px solid #3B82F6; font-size: 0.85rem; margin-bottom: 10px; color: #334155;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. API VE MODEL (404 Hatası Çözüldü)
+# 3. API VE GEMINI 3 FLASH MODELİ
 # ==========================================
-SISTEM_PROMPTU = """Sen bir Siber Hukuk ve Yapay Zeka Ajanısın.
-Görevin siber zorbalık, KVKK ihlalleri, hacklenme ve dijital dolandırıcılık vakalarını TCK mevzuatına göre analiz etmektir.
-Yanıtlarını profesyonel, siber güvenlik terminolojisine uygun ve madde işaretli ver.
-Doğrudan bilgi sun, gereksiz cümle kurma. Atılması gereken adımları (USOM, Savcılık, BTK) net olarak belirt."""
+SISTEM_PROMPTU = """Sen uzman bir Siber Hukuk Asistanısın.
+Görevin siber vakaları (KVKK ihlalleri, dolandırıcılık, hesap çalınması) TCK mevzuatına göre analiz etmektir.
+Yanıtlarını çok resmi, net, madde işaretli ve tamamen Türkiye yasalarına dayandırarak ver.
+Kullanıcıya avukat olmadığını ve bilginin tavsiye niteliğinde olduğunu hissettir."""
 
 try:
     API_KEY = st.secrets["GEMINI_API_KEY"]
     genai.configure(api_key=API_KEY)
-    # 404 hatasını çözen garantili model isimlendirmesi:
-    model = genai.GenerativeModel('gemini-1.5-flash-latest') 
+    # Model Gemini 3 Flash olarak güncellendi!
+    model = genai.GenerativeModel('gemini-3.0-flash') 
 except Exception as e:
     st.error("⚠️ API Anahtarı eksik veya model yüklenemedi. Secrets ayarlarını kontrol edin.")
     st.stop()
@@ -119,54 +133,55 @@ if "chat_session" not in st.session_state:
     st.session_state.chat_session = model.start_chat(history=[])
 
 # ==========================================
-# 5. YAN MENÜ (SİBER KONTROL PANELİ)
+# 5. YAN MENÜ (SOL PANEL)
 # ==========================================
 with st.sidebar:
-    st.markdown("## 🤖 SİBER KONTROL PANELİ")
+    st.markdown("## ⚖️ Siber Hukuk Asistanı")
+    st.markdown("<span style='color: #64748B; font-size: 0.9rem;'>Sürüm 5.0 (Light)</span>", unsafe_allow_html=True)
     
-    # AI Konseptli Durum Göstergeleri
+    st.divider()
+    
     st.markdown("""
-    <div class='status-box'>
-    🟢 <b>Sistem:</b> Çevrimiçi<br>
-    ⚡ <b>Yapay Zeka:</b> Aktif<br>
-    📚 <b>Veritabanı:</b> TCK & KVKK Entegre
+    <div class='info-box'>
+    <b>Proje Geliştiricileri:</b><br>
+    👤 Merve [Soyadı]<br>
+    👤 [Senin Adın]
+    </div>
+    <div class='info-box' style='border-left-color: #10B981;'>
+    <b>Aktif Model:</b> Gemini 3 Flash<br>
+    <b>Veritabanı:</b> TCK & KVKK
     </div>
     """, unsafe_allow_html=True)
     
     st.divider()
     
-    st.markdown("### 👨‍💻 Geliştirici Ekip")
-    st.caption("Merve & [Adın] | Sürüm 4.0")
-    
-    st.divider()
-    
-    if st.button("🔄 Hafızayı Temizle / Reset", use_container_width=True):
+    if st.button("🔄 Yeni Analiz Başlat", use_container_width=True):
         st.session_state.messages = []
         st.session_state.chat_session = model.start_chat(history=[])
         st.rerun()
         
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("<div class='warning-box'>⚠️ <b>Yasal Uyarı:</b> Bu sistem yapay zeka tabanlı bir asistandır. Resmi avukat danışmanlığı yerine geçmez.</div>", unsafe_allow_html=True)
+    st.warning("⚠️ Bu sistem sadece bilgilendirme amaçlıdır. Resmi hukuki danışmanlık yerine geçmez.")
 
 # ==========================================
 # 6. ANA EKRAN VE SOHBET (DİNAMİK)
 # ==========================================
 
-# Sadece sohbet boşken siber başlığı göster
+# Sadece sohbet boşken ana başlığı göster
 if len(st.session_state.messages) == 0:
-    st.markdown('<div class="cyber-title">SİBER HUKUK AI</div>', unsafe_allow_html=True)
-    st.markdown('<div class="cyber-subtitle">Bilişim Suçları ve Veri İhlali Erken Uyarı Sistemi</div>', unsafe_allow_html=True)
+    st.markdown('<div class="legal-title">Siber Hukuk Asistanı</div>', unsafe_allow_html=True)
+    st.markdown('<div class="legal-subtitle">Bilişim Suçları ve Veri İhlali Danışma Merkezi</div>', unsafe_allow_html=True)
 
 # Mesajları Ekrana Çiz
 for msg in st.session_state.messages:
-    avatar = "👤" if msg["role"] == "user" else "🤖"
+    avatar = "👤" if msg["role"] == "user" else "⚖️"
     with st.chat_message(msg["role"], avatar=avatar):
         st.markdown(msg["content"])
 
 # ==========================================
 # 7. SOHBET MANTIĞI VE API İSTEĞİ
 # ==========================================
-if prompt := st.chat_input("Vakayı analiz et veya hukuki bir soru sor..."):
+if prompt := st.chat_input("Hukuki bir soru sorun veya vakayı anlatın..."):
     
     # Kullanıcı mesajını ekle
     st.session_state.messages.append({"role": "user", "content": prompt})
@@ -174,8 +189,8 @@ if prompt := st.chat_input("Vakayı analiz et veya hukuki bir soru sor..."):
         st.markdown(prompt)
 
     # AI Yanıtı
-    with st.chat_message("assistant", avatar="🤖"):
-        with st.spinner("Siber veritabanı taranıyor..."):
+    with st.chat_message("assistant", avatar="⚖️"):
+        with st.spinner("Hukuki analiz yapılıyor..."):
             try:
                 # Modeli çökertmeden gizli sistem promptunu soruya entegre ediyoruz
                 tam_prompt = f"GİZLİ SİSTEM KOMUTU: {SISTEM_PROMPTU}\n\nKULLANICI VAKASI/SORUSU: {prompt}"
@@ -184,4 +199,4 @@ if prompt := st.chat_input("Vakayı analiz et veya hukuki bir soru sor..."):
                 st.markdown(response.text)
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
             except Exception as e:
-                st.error(f"Sistem Hatası: {str(e)}")
+                st.error("Sunucularımızda anlık bir yoğunluk yaşanıyor. Lütfen sayfayı yenileyip tekrar deneyin.")
