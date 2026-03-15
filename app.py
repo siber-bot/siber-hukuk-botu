@@ -1,97 +1,124 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. API Ayarları
-API_KEY = st.secrets["GEMINI_API_KEY"]
-genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel('gemini-1.5-flash')
+# 1. API Ayarları (Hata alma ihtimaline karşı try-except içine alındı)
+try:
+    API_KEY = st.secrets["GEMINI_API_KEY"]
+    genai.configure(api_key=API_KEY)
+    model = genai.GenerativeModel('gemini-1.5-flash')
+except Exception as e:
+    st.error("API Anahtarı bulunamadı. Lütfen Secrets ayarlarını kontrol edin.")
 
-# 2. ChatGPT/Gemini Tarzı Sade Arayüz Ayarları
+# 2. Modern Profesyonel Arayüz Ayarları
 st.set_page_config(
     page_title="Siber Hukuk Asistanı", 
     page_icon="⚖️", 
-    layout="wide" # Geniş ekran, daha modern durur
+    layout="wide"
 )
 
-# --- CSS İLE ÖZEL MAKYAJ (Sadelik İçin) ---
+# --- CSS: MODERN DARK MODE & CHAT STYLING ---
 st.markdown("""
     <style>
-    /* Üstteki Streamlit menülerini gizle */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    
-    /* Mesaj alanını ortala ve genişliğini ayarla */
-    .block-container {
-        max-width: 800px;
-        padding-top: 2rem;
+    /* Ana Arkaplan */
+    .stApp {
+        background-color: #0E1117;
     }
     
-    /* Başlık stilini sadeleştir */
-    .main-title {
-        font-size: 2.2rem;
-        font-weight: 700;
+    /* Header ve Menüleri Gizle */
+    header, footer, #MainMenu {visibility: hidden;}
+
+    /* Sidebar Tasarımı */
+    [data-testid="stSidebar"] {
+        background-color: #161B22;
+        border-right: 1px solid #30363D;
+    }
+
+    /* Mesaj Balonlarını Güzelleştir */
+    .stChatMessage {
+        background-color: #161B22;
+        border-radius: 15px;
+        margin-bottom: 10px;
+        border: 1px solid #30363D;
+    }
+    
+    /* Başlık Alanı */
+    .main-header {
+        font-family: 'Inter', sans-serif;
+        color: #58A6FF;
         text-align: center;
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+    
+    .sub-header {
+        text-align: center;
+        color: #8B949E;
         margin-bottom: 2rem;
-        color: #FFFFFF;
+    }
+
+    /* Sohbet Kutusu Ortala */
+    .block-container {
+        max-width: 900px;
+        padding-top: 3rem;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- SIDEBAR (Minimalist) ---
+# --- SIDEBAR: PROFESYONEL PANEL ---
 with st.sidebar:
-    st.markdown("### ⚖️ Siber Hukuk Asistanı")
-    st.caption("Versiyon 2.0 | Akademik Proje")
+    st.markdown("## ⚖️ Siber Hukuk AI")
+    st.markdown("---")
+    st.markdown("### 📋 Proje Bilgileri")
+    st.info("**Geliştiriciler:**\n\n- Merve [Soyadı]\n- [Senin Adın]")
+    st.markdown("---")
+    st.markdown("### 🛠️ Sistem Durumu")
+    st.success("Çevrimiçi (v2.1 Elite)")
     st.divider()
-    st.markdown("""
-    **Geliştiriciler:**
-    - Merve [Soyadı]
-    - [Senin Adın]
-    """)
-    st.divider()
-    st.warning("Hukuki danışmanlık değildir. Bilgilendirme amaçlıdır.")
-    if st.button("Sohbeti Temizle"):
+    if st.button("🗑️ Sohbeti Sıfırla"):
         st.session_state.messages = []
         st.rerun()
+    st.markdown("---")
+    st.warning("⚠️ Bu sistem bilgilendirme amaçlıdır. Hukuki danışmanlık değildir.")
 
 # --- ANA EKRAN ---
-st.markdown('<p class="main-title">Siber Hukuk Asistanı</p>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header">Siber Hukuk Asistanı</h1>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">Bilişim Suçları ve KVKK Analiz Merkezi</p>', unsafe_allow_html=True)
 
-# Mesaj Geçmişi Başlatma
+# Hafıza Yönetimi
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Mesajları Ekrana Basma (Avatar kullanarak daha şık görünüm)
+# Mesajları Görüntüle
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# --- SOHBET GİRİŞİ ---
-if prompt := st.chat_input("Nasıl yardımcı olabilirim?"):
-    # Kullanıcı mesajı
+# --- SOHBET AKIŞI ---
+if prompt := st.chat_input("Size nasıl yardımcı olabilirim?"):
+    # Kullanıcı girişi
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Gemini Zekâ Komutları (Prompt Engineering)
-    sistem_talimati = f"""
-    Sen uzman bir Siber Hukuk Asistanısın. Cevaplarını ChatGPT/Gemini tarzında, 
-    son derece sade, anlaşılır ve profesyonel ver. 
-    - Gereksiz giriş-sonuç cümlelerini at.
-    - Olayı Analiz, Riskler ve Öneriler şeklinde kısa maddelerle açıkla.
-    - Türkiye hukukuna (TCK, KVKK) ve kurumlarına (USOM, BTK) odaklan.
-    - Her mesajda yasal uyarı yapma (sidebar'da mevcut).
-    
-    Soru: {prompt}
-    """
-
-    # Asistan cevabı
+    # Yapay Zeka Yanıtı
     with st.chat_message("assistant"):
-        with st.spinner(""): # Sade bir bekleme simgesi
-            try:
-                response = model.generate_content(sistem_talimati)
+        message_placeholder = st.empty()
+        full_response = ""
+        
+        # Prompt Mühendisliği
+        prompt_style = f"""
+        Uzman bir siber hukuk danışmanı gibi davran. 
+        Yanıtını profesyonel, net ve kısa tut. 
+        Türkiye yasalarına (TCK, KVKK) mutlaka atıf yap. 
+        Kullanıcı sorusu: {prompt}
+        """
+
+        try:
+            with st.spinner("Vaka inceleniyor..."):
+                response = model.generate_content(prompt_style)
                 full_response = response.text
                 st.markdown(full_response)
                 st.session_state.messages.append({"role": "assistant", "content": full_response})
-            except Exception as e:
-                st.error("Bir hata oluştu, lütfen tekrar deneyin.")
+        except Exception as e:
+            st.error("Bağlantı sorunu yaşandı. Lütfen tekrar deneyin.")
