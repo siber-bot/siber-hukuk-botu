@@ -45,7 +45,7 @@ try:
     genai.configure(api_key=API_KEY)
     
     # Not: Eğer Google API bu isimlendirmeyi kabul etmezse hata fırlatacak.
-    model = genai.GenerativeModel('gemini-3.0-flash')
+    model = genai.GenerativeModel('gemini-1.5-flash')
 except Exception as e:
     st.error(f"Sistem Başlatılamadı! Detay: {str(e)}")
     st.stop()
