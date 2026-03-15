@@ -54,7 +54,15 @@ header { display: none !important; visibility: hidden !important; }
     max-width: 780px !important;
     width: 100% !important;
     margin: 0 auto !important;
-    padding: 0 1rem 7rem 1rem !important;
+    padding: 0 1rem 5rem 1rem !important;
+}
+
+/* Tüm arka planları zorla siyah yap */
+section.main, .main,
+[data-testid="stAppViewContainer"] > section,
+[data-testid="stMainBlockContainer"],
+[data-testid="stVerticalBlock"] {
+    background-color: #0f0f0f !important;
 }
 
 /* ── TOP NAV BAR ──────────────────────────────── */
@@ -210,15 +218,16 @@ header { display: none !important; visibility: hidden !important; }
 }
 
 /* ── INPUT BAR ────────────────────────────────── */
+/* Tüm sayfanın altını kapatan beyaz/gri katmanı sıfırla */
+[data-testid="stBottom"] {
+    background: #0f0f0f !important;
+    border-top: none !important;
+}
+
 [data-testid="stChatFloatingInputContainer"] {
-    background: linear-gradient(to top, #0f0f0f 85%, transparent) !important;
-    padding: 1rem 0 1.5rem !important;
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: 100% !important;
-    max-width: 780px !important;
+    background: #0f0f0f !important;
+    padding: 0.75rem 1rem 1.25rem !important;
+    border-top: 1px solid #1c1c1c !important;
 }
 
 [data-testid="stChatInput"] {
