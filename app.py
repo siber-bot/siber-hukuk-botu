@@ -33,7 +33,7 @@ def save_db(data):
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 # ==========================================
-# 3. ÖZEL CSS (GERÇEK YAPAY ZEKA ARAYÜZÜ)
+# 3. ÖZEL CSS (GENÇ, DİNAMİK VE İNOVATİF)
 # ==========================================
 st.markdown("""
 <style>
@@ -52,92 +52,92 @@ st.markdown("""
         visibility: visible !important;
         display: block !important;
     }
-    
     section[data-testid="stSidebar"] > div:first-child { background-color: transparent !important; }
     button[data-testid="stSidebarCollapseButton"], [data-testid="collapsedControl"] { display: none !important; }
 
-    /* ANA İÇERİK HİZALAMASI */
     .block-container { padding-top: 2.5rem !important; max-width: 850px !important; margin: 0 auto !important; }
+    .portal-title { text-align: center; font-weight: 800; font-size: 2.2rem; color: #0F172A; margin-top: 0; pointer-events: none; }
 
-    .portal-title {
-        text-align: center; font-weight: 800; font-size: 2.2rem; color: #0F172A; margin-top: 0; pointer-events: none;
-    }
-
-    /* ========================================= */
-    /* SİDEBAR BUTONLARINI MODERNLEŞTİRME        */
-    /* ========================================= */
-    
-    /* 1. Kırmızı "Primary" Butonu -> Kurumsal Laciverte Çevir */
+    /* YENİ ANALİZ BUTONU (KURUMSAL AMA HAVALI) */
     [data-testid="stSidebar"] .stButton > button[kind="primary"] {
-        background: #1E293B !important; /* Koyu Lacivert */
+        background: #1E293B !important; 
         color: #FFFFFF !important;
         border: none !important;
-        border-radius: 8px !important;
+        border-radius: 12px !important;
         padding: 0.6rem 1rem !important;
-        font-weight: 600 !important;
+        font-weight: 700 !important;
         letter-spacing: 0.5px !important;
-        transition: all 0.2s ease !important;
+        transition: all 0.3s ease !important;
         width: 100% !important;
+        box-shadow: 0 4px 10px rgba(30, 41, 59, 0.2) !important;
     }
     [data-testid="stSidebar"] .stButton > button[kind="primary"]:hover {
-        background: #334155 !important;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+        background: #0F172A !important;
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 6px 15px rgba(30, 41, 59, 0.3) !important;
     }
 
-    /* 2. Tüm kaba çerçeveleri "Secondary" butonlardan sil */
-    [data-testid="stSidebar"] .stButton > button[kind="secondary"] {
-        border: none !important;
-        box-shadow: none !important;
-        background: transparent !important;
-    }
-
-    /* 3. Kolonlar arasındaki boşlukları sıfırla (Bütünlük hissi için) */
-    [data-testid="stHorizontalBlock"] {
-        gap: 0rem !important;
-        align-items: center !important;
-    }
-
-    /* 4. Geçmiş Analiz Metni (Sola Yaslı) */
+    /* GEÇMİŞ ANALİZ METNİ (Sola Yaslı, Modern) */
     [data-testid="column"]:nth-child(1) .stButton > button[kind="secondary"] {
         text-align: left !important;
-        padding: 8px 12px !important;
+        padding: 10px 12px !important;
         color: #374151 !important;
         font-size: 0.95rem !important;
-        font-weight: 400 !important;
-        border-radius: 6px !important;
+        font-weight: 500 !important;
+        border-radius: 12px !important;
+        border: none !important;
+        background: transparent !important;
+        transition: all 0.2s !important;
     }
     [data-testid="column"]:nth-child(1) .stButton > button[kind="secondary"]:hover {
-        background: #E5E7EB !important;
-        color: #111827 !important;
+        background: #F1F5F9 !important;
+        color: #0F172A !important;
     }
 
-    /* 5. İkon Butonları (Düzenle ve Sil) - Şeffaf ve Renk Değiştiren */
-    [data-testid="column"]:nth-child(2) .stButton > button[kind="secondary"],
-    [data-testid="column"]:nth-child(3) .stButton > button[kind="secondary"] {
-        padding: 8px 0 !important;
-        color: #9CA3AF !important;
+    /* ========================================= */
+    /* GENÇ & DİNAMİK AKSİYON BUTONLARI (Z KUŞAĞI) */
+    /* ========================================= */
+    
+    /* İkon Kolonları: Kapsül (Pill) Şekli ve 3D His */
+    [data-testid="stHorizontalBlock"] > [data-testid="column"]:nth-child(2) .stButton > button,
+    [data-testid="stHorizontalBlock"] > [data-testid="column"]:nth-child(3) .stButton > button {
+        border: none !important;
+        background: #F1F5F9 !important; /* Standart yumuşak gri */
+        border-radius: 14px !important; /* Modern squircle hatlar */
+        padding: 6px 0 !important;
         font-size: 1.1rem !important;
+        color: #64748B !important;
+        /* Alışılagelmişin dışında, oyun tarzı zıplama animasyonu */
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; 
     }
-    [data-testid="column"]:nth-child(2) .stButton > button[kind="secondary"]:hover {
-        color: #3B82F6 !important; /* Mavi Kalem */
-        background: transparent !important;
+
+    /* 🪄 Sihir (Düzenle) Butonu Hover: Neon Mor/Pembe Gradient */
+    [data-testid="stHorizontalBlock"] > [data-testid="column"]:nth-child(2) .stButton > button:hover {
+        background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%) !important;
+        color: white !important;
+        /* Zıplayıp sağa yatma efekti */
+        transform: translateY(-4px) scale(1.15) rotate(10deg) !important;
+        box-shadow: 0 8px 15px rgba(236, 72, 153, 0.4) !important;
     }
-    [data-testid="column"]:nth-child(3) .stButton > button[kind="secondary"]:hover {
-        color: #EF4444 !important; /* Kırmızı Çarpı */
-        background: transparent !important;
+
+    /* 💥 Patlat (Sil) Butonu Hover: Neon Kırmızı/Turuncu Gradient */
+    [data-testid="stHorizontalBlock"] > [data-testid="column"]:nth-child(3) .stButton > button:hover {
+        background: linear-gradient(135deg, #EF4444 0%, #F97316 100%) !important;
+        color: white !important;
+        /* Zıplayıp sola yatma efekti */
+        transform: translateY(-4px) scale(1.15) rotate(-10deg) !important;
+        box-shadow: 0 8px 15px rgba(239, 68, 68, 0.4) !important;
     }
 
     /* ========================================= */
-    /* MESAJ BALONLARI                           */
-    /* ========================================= */
+    /* MESAJ BALONLARI */
     [data-testid="stChatMessage"] { padding: 0.5rem 0 !important; }
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) .stMarkdown {
-        background-color: #F3F4F6 !important; border-radius: 20px !important; padding: 10px 15px !important;
+        background-color: #F1F5F9 !important; border-radius: 20px !important; padding: 10px 15px !important;
     }
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) .stMarkdown {
-        background-color: #FFFFFF !important; border: 1px solid #F3F4F6 !important; border-radius: 20px !important; 
-        padding: 10px 15px !important; box-shadow: 0 2px 10px rgba(0,0,0,0.02) !important;
+        background-color: #FFFFFF !important; border: 1px solid #F1F5F9 !important; border-radius: 20px !important; 
+        padding: 10px 15px !important; box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -150,7 +150,6 @@ SISTEM_PROMPTU = "Sen uzman bir Siber Hukuk Asistanısın. Yanıtlarını resmi,
 try:
     API_KEY = st.secrets["GEMINI_API_KEY"]
     genai.configure(api_key=API_KEY)
-    # Model ismi korundu
     model = genai.GenerativeModel('gemini-3-flash-preview') 
 except Exception as e:
     st.error("API Hatası! Lütfen Streamlit ayarlarını kontrol edin.")
@@ -171,7 +170,7 @@ if "edit_id" not in st.session_state:
     st.session_state.edit_id = None
 
 # ==========================================
-# 6. SOL MENÜ (MODERN SİDEBAR)
+# 6. SOL MENÜ (İNOVATİF SİDEBAR)
 # ==========================================
 with st.sidebar:
     st.markdown("<h2 style='color:#0F172A; margin-top:0px; margin-bottom:5px; font-weight:800;'>⚖️ Siber Asistan</h2>", unsafe_allow_html=True)
@@ -188,35 +187,35 @@ with st.sidebar:
         st.session_state.chat_session = model.start_chat(history=[])
         st.rerun()
 
-    st.markdown("<p style='font-size:0.75rem; color:#64748B; font-weight:700; margin-top:25px; margin-bottom:10px; letter-spacing: 0.5px;'>GEÇMİŞ ANALİZLER</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size:0.75rem; color:#64748B; font-weight:700; margin-top:25px; margin-bottom:15px; letter-spacing: 0.5px;'>GEÇMİŞ ANALİZLER</p>", unsafe_allow_html=True)
     
     t_db = db.copy()
     for cid in sorted(t_db.keys(), reverse=True):
         if st.session_state.edit_id == cid:
             new_val = st.text_input("Düzenle", value=t_db[cid][0].get("title", t_db[cid][0]["content"][:15]), key=f"r_{cid}", label_visibility="collapsed")
-            if st.button("💾 Kaydet", key=f"s_{cid}", use_container_width=True):
+            # Kaydet butonunu da "Primary" yapıp Roket ekledik!
+            if st.button("🚀 Kaydet", type="primary", key=f"s_{cid}", use_container_width=True):
                 t_db[cid][0]["title"] = new_val
                 save_db(t_db)
                 st.session_state.edit_id = None
                 st.rerun()
         else:
-            # Modern, boşluksuz kolon yapısı
-            c1, c2, c3 = st.columns([0.76, 0.12, 0.12], gap="small")
+            # Kolon oranlarını yeni animasyonlar için optimize ettik
+            c1, c2, c3 = st.columns([0.68, 0.16, 0.16], gap="small")
             with c1:
-                display_t = t_db[cid][0].get("title", t_db[cid][0]["content"][:22] + "...")
-                # Emoji kaldırıldı, sadece düz ve şık metin kaldı
+                display_t = t_db[cid][0].get("title", t_db[cid][0]["content"][:20] + "...")
                 if st.button(f"{display_t}", key=f"ch_{cid}", use_container_width=True):
                     st.session_state.current_chat_id = cid
                     st.session_state.messages = t_db[cid]
                     st.rerun()
             with c2:
-                # Zarif ince kalem sembolü
-                if st.button("✎", key=f"e_{cid}", help="Yeniden Adlandır"):
+                # Sihir Değneği Butonu
+                if st.button("🪄", key=f"e_{cid}", help="İsmi Yeniden Adlandır"):
                     st.session_state.edit_id = cid
                     st.rerun()
             with c3:
-                # Zarif ince çarpı sembolü
-                if st.button("✕", key=f"d_{cid}", help="Sil"):
+                # Patlama (Yok Etme) Butonu
+                if st.button("💥", key=f"d_{cid}", help="Geçmişi Sil"):
                     del t_db[cid]
                     save_db(t_db)
                     if st.session_state.current_chat_id == cid: 
@@ -249,7 +248,7 @@ if prompt := st.chat_input("Hukuki vakayı yazın..."):
             tam_prompt = f"GİZLİ SİSTEM KOMUTU: {SISTEM_PROMPTU}\n\nSORU: {prompt}"
             res = st.session_state.chat_session.send_message(tam_prompt, stream=True)
             
-            st.empty() # Loading yazısını temizle
+            st.empty() 
             full_res = ""
             message_placeholder = st.empty()
             
