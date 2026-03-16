@@ -12,7 +12,7 @@ st.set_page_config(
     page_title="Siber Hukuk Asistanı",
     page_icon="⚖️",
     layout="wide",
-    initial_sidebar_state="expanded" # Menü her zaman açık başlar
+    initial_sidebar_state="expanded" 
 )
 
 # ==========================================
@@ -33,31 +33,28 @@ def save_db(data):
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 # ==========================================
-# 3. ÖZEL CSS (SABİT MENÜ VE AYDINLIK TEMA)
+# 3. ÖZEL CSS (SABİT GRİ MENÜ VE AYDINLIK TEMA)
 # ==========================================
 st.markdown("""
 <style>
-    /* ZORUNLU AYDINLIK TEMA */
+    /* ZORUNLU AYDINLIK TEMA - ANA SAYFA BEYAZ */
     .stApp, .main { background-color: #FFFFFF !important; }
     [data-testid="stHeader"] { background: transparent !important; }
     .stMarkdown p, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 { color: #0F172A !important; }
 
-    /* SİDEBAR'I SABİTLEME VE KAPATMA BUTONUNU GİZLEME */
-    [data-testid="stSidebarCollapseButton"] { 
-        display: none !important; /* Kapatma okunu gizledik, böylece menü sabit kaldı */
-    }
-    
+    /* SİDEBAR KONTROLLERİNİ GİZLE VE SABİTLE */
+    [data-testid="stSidebarCollapseButton"] { display: none !important; }
+    [data-testid="collapsedControl"] { display: none !important; }
+
+    /* SİDEBAR ARKA PLAN RENGİ (HAFİF GRİ) */
     [data-testid="stSidebar"] { 
-        background-color: #F8FAFC !important; 
+        background-color: #F0F2F6 !important; 
         border-right: 1px solid #E2E8F0 !important;
         min-width: 320px !important;
         max-width: 320px !important;
     }
 
-    /* ARAÇ ÇUBUĞUNU GİZLE */
-    [data-testid="stToolbar"] { display: none !important; }
-
-    /* ANA KONTEYNER (Menü sabit olduğu için padding'i normale çektik) */
+    /* ANA KONTEYNER */
     .block-container { 
         padding-top: 3rem !important; 
         max-width: 850px !important; 
@@ -73,20 +70,25 @@ st.markdown("""
         margin-top: 0rem;
     }
 
-    /* SOHBET LİSTESİ BUTONLARI */
+    /* ARAÇ ÇUBUĞUNU GİZLE */
+    [data-testid="stToolbar"] { display: none !important; }
+
+    /* SOHBET LİSTESİ BUTONLARI (Gri üstünde beyaz kart görünümü) */
     div[data-testid="stVerticalBlock"] div.stButton > button {
         text-align: left !important;
         width: 100% !important;
         border: none !important;
-        background: transparent !important;
-        padding: 8px 12px !important;
-        border-radius: 10px !important;
+        background: #FFFFFF !important; 
+        padding: 10px 12px !important;
+        border-radius: 8px !important;
         color: #475569 !important;
         transition: all 0.2s !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
     }
     div[data-testid="stVerticalBlock"] div.stButton > button:hover {
-        background-color: #F1F5F9 !important;
-        color: #1E293B !important;
+        background-color: #E2E8F0 !important;
+        color: #0F172A !important;
+        transform: translateY(-1px);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -120,14 +122,18 @@ if "edit_id" not in st.session_state:
 # 6. SOL MENÜ (SABİT SİDEBAR) İÇERİĞİ
 # ==========================================
 with st.sidebar:
-    st.markdown("<h3 style='color:#0F172A; margin-top:10px;'>⚖️ Siber Asistan</h3>", unsafe_allow_html=True)
-    st.markdown("<p style='font-size:0.85rem; color:#3B82F6; font-style:italic; margin-bottom:20px;'>Dijital dünyada adaletin rehberi.</p>", unsafe_allow_html=True)
+    # 1. Proje Adı ve Motivasyon
+    st.markdown("<h3 style='color:#0F172A; margin-top:10px; margin-bottom:5px;'>⚖️ Siber Asistan</h3>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size:0.85rem; color:#3B82F6; font-style:italic; margin-bottom:25px;'>Dijital dünyada adaletin rehberi.</p>", unsafe_allow_html=True)
     
+    # 2. Proje Sahibi
     st.markdown("<p style='font-size:0.7rem; color:#94A3B8; font-weight:700; margin-bottom:5px;'>PROJE SAHİBİ</p>", unsafe_allow_html=True)
     st.markdown("👤 **Merve [Soyadı]**")
     
+    # 3. Section Çizgisi
     st.divider()
     
+    # 4. Yeni Analiz ve Geçmiş Chatler
     if st.button("➕ Yeni Analiz Başlat", type="primary", use_container_width=True):
         st.session_state.current_chat_id = datetime.now().strftime("%Y%m%d_%H%M%S")
         st.session_state.messages = []
@@ -195,11 +201,10 @@ if prompt := st.chat_input("Hukuki vakayı yazın..."):
             for chunk in res:
                 full_res += chunk.text
                 message_placeholder.markdown(full_res + "▌")
-                time.sleep(0.01) # Akıcı soft yazma animasyonu
+                time.sleep(0.01)
             
             message_placeholder.markdown(full_res)
             
-            # İlk mesajsa otomatik başlık atama
             if len(st.session_state.messages) == 1:
                 st.session_state.messages[0]["title"] = prompt[:25]
                 
