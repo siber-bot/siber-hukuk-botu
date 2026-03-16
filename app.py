@@ -416,7 +416,7 @@ with st.sidebar:
         <p class='sb-tag'>Dijital dünyada adaletin rehberi.</p>
         <div class='sb-label'>Proje Sahibi</div>
         <p style='font-size:0.85rem;color:#374151;padding:0 2px 8px;font-weight:500;'>
-            👤 Merve [Soyadı]
+            👤 Merve Havuz
         </p>
         <hr class='sb-divider'/>
     """, unsafe_allow_html=True)
