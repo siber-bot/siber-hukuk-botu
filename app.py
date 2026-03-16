@@ -12,7 +12,7 @@ st.set_page_config(
     page_title="Siber Hukuk Asistanı",
     page_icon="⚖️",
     layout="wide",
-    initial_sidebar_state="expanded" # Menü açık başlar
+    initial_sidebar_state="expanded"
 )
 
 # ==========================================
@@ -33,39 +33,38 @@ def save_db(data):
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 # ==========================================
-# 3. ÖZEL CSS (BUG FİX & KUSURSUZ TASARIM)
+# 3. ÖZEL CSS (MENÜYÜ ZORLA GÖRÜNÜR YAPAN FİX)
 # ==========================================
 st.markdown("""
 <style>
-    /* 1. ANA UYGULAMA BEYAZ, HEADER GİZLİ */
+    /* ANA UYGULAMA TEMA AYARLARI */
     .stApp, .main { background-color: #FFFFFF !important; }
     header[data-testid="stHeader"] { display: none !important; }
     [data-testid="stToolbar"] { display: none !important; }
 
-    /* 2. SİDEBAR KESİN SABİTLEME VE RENKLENDİRME (BUG BURADA ÇÖZÜLÜYOR) */
-    /* Streamlit'in menü kapsayıcısını gri yapıyoruz */
+    /* --- SİHİRLİ DOKUNUŞ: SİDEBAR'I ZORLA AÇIK TUT --- */
     section[data-testid="stSidebar"] { 
-        background-color: #F1F5F9 !important; /* Çok şık, modern bir açık gri */
+        background-color: #F1F5F9 !important; /* Arka plan hafif gri */
         border-right: 1px solid #E2E8F0 !important;
         min-width: 320px !important;
         max-width: 320px !important;
+        transform: none !important; /* GİZLENMESİNİ KESİNLİKLE ENGELLER */
+        visibility: visible !important; /* GÖRÜNÜRLÜĞÜ ZORUNLU KILAR */
+        display: block !important;
     }
     
-    /* Streamlit'in içteki inatçı beyaz katmanını şeffaf yapıyoruz! */
+    /* Streamlit'in içteki beyaz maskesini şeffaf yap */
     section[data-testid="stSidebar"] > div:first-child {
         background-color: transparent !important; 
     }
 
-    /* 3. AÇ/KAPAT BUTONLARINI DOM'DAN SİL */
+    /* AÇ/KAPAT BUTONLARINI TAMAMEN SİL */
     button[data-testid="stSidebarCollapseButton"],
     [data-testid="collapsedControl"] { 
         display: none !important; 
-        width: 0 !important;
-        height: 0 !important;
-        visibility: hidden !important;
     }
 
-    /* 4. ANA İÇERİK HİZALAMASI */
+    /* ANA İÇERİK HİZALAMASI (Menünün genişliğine göre) */
     .block-container { 
         padding-top: 2.5rem !important; 
         max-width: 850px !important; 
@@ -80,7 +79,7 @@ st.markdown("""
         margin-top: 0;
     }
 
-    /* 5. GEÇMİŞ SOHBET BUTONLARI (Gri zemin üstünde beyaz, gölgeli kartlar) */
+    /* GEÇMİŞ SOHBET BUTONLARI (Gri zemin üstünde beyaz kartlar) */
     div[data-testid="stVerticalBlock"] div.stButton > button {
         text-align: left !important;
         width: 100% !important;
@@ -100,7 +99,6 @@ st.markdown("""
         color: #0F172A !important;
     }
     
-    /* Divider çizgisini biraz belirginleştir */
     hr {
         margin: 1.5rem 0 !important;
         border-bottom: 1px solid #CBD5E1 !important;
@@ -141,11 +139,10 @@ with st.sidebar:
     st.markdown("<p style='font-size:0.85rem; color:#3B82F6; font-style:italic; margin-bottom:25px;'>Dijital dünyada adaletin rehberi.</p>", unsafe_allow_html=True)
     
     st.markdown("<p style='font-size:0.75rem; color:#64748B; font-weight:700; margin-bottom:5px; letter-spacing: 0.5px;'>PROJE SAHİBİ</p>", unsafe_allow_html=True)
-    st.markdown("👤 **Merve [Soyadı]**")
+    st.markdown("👤 **Merve Soyadı**")
     
     st.divider()
     
-    # Yeni Analiz Butonu
     if st.button("➕ Yeni Analiz Başlat", type="primary", use_container_width=True):
         st.session_state.current_chat_id = datetime.now().strftime("%Y%m%d_%H%M%S")
         st.session_state.messages = []
@@ -164,7 +161,6 @@ with st.sidebar:
                 st.session_state.edit_id = None
                 st.rerun()
         else:
-            # Kolon genişlikleri düzenlendi (butonların taşmaması için)
             c1, c2, c3 = st.columns([0.65, 0.15, 0.20])
             with c1:
                 display_t = t_db[cid][0].get("title", t_db[cid][0]["content"][:18] + "...")
