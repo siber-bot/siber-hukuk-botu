@@ -25,7 +25,8 @@ def load_db():
         try:
             with open(DB_FILE, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except: return {}
+        except:
+            return {}
     return {}
 
 def save_db(data):
@@ -33,28 +34,41 @@ def save_db(data):
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 # ==========================================
-# 3. ÖZEL CSS — MODERN AI ARAYÜZÜ
+# 3. ÖZEL CSS
 # ==========================================
 st.markdown("""
 <style>
-    /* ── GENEL UYGULAMA ── */
-    .stApp, .main { background-color: #FFFFFF !important; }
-    header[data-testid="stHeader"] { display: none !important; }
-    [data-testid="stToolbar"]       { display: none !important; }
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
+    * { font-family: 'DM Sans', sans-serif !important; }
 
-    /* ── SİDEBAR KAPSAYICI ── */
+    /* ── GENEL ── */
+    .stApp, .main { background-color: #F8FAFC !important; }
+    header[data-testid="stHeader"] { display: none !important; }
+    [data-testid="stToolbar"]      { display: none !important; }
+    #MainMenu                      { display: none !important; }
+    footer                         { display: none !important; }
+
+    /* ── Streamlit "Manage app" ve tüm sağ alt badge varyantlarını gizle ── */
+    [data-testid="stDeployButton"]  { display: none !important; }
+    [data-testid="stStatusWidget"]  { display: none !important; }
+    [class*="viewerBadge"]          { display: none !important; }
+    [class*="StatusWidget"]         { display: none !important; }
+    ._container_51w34_1             { display: none !important; }
+    .st-emotion-cache-zq5wmm        { display: none !important; }
+
+    /* ── SİDEBAR ── */
     section[data-testid="stSidebar"] {
-        background-color: #171717 !important;
-        border-right: 1px solid #2A2A2A !important;
-        min-width: 280px !important;
-        max-width: 280px !important;
+        background-color: #F9FAFB !important;
+        border-right: 1px solid #E5E7EB !important;
+        min-width: 290px !important;
+        max-width: 290px !important;
         transform: none !important;
         visibility: visible !important;
         display: block !important;
     }
     section[data-testid="stSidebar"] > div:first-child {
         background-color: transparent !important;
-        padding: 0 !important;
+        padding: 0 10px !important;
     }
     button[data-testid="stSidebarCollapseButton"],
     [data-testid="collapsedControl"] { display: none !important; }
@@ -62,7 +76,7 @@ st.markdown("""
     /* ── ANA İÇERİK ── */
     .block-container {
         padding-top: 2.5rem !important;
-        max-width: 800px !important;
+        max-width: 820px !important;
         margin: 0 auto !important;
     }
     .portal-title {
@@ -75,70 +89,69 @@ st.markdown("""
         letter-spacing: -0.5px;
     }
 
-    /* ══════════════════════════════════════
+    /* ══════════════════════════════════
        YENİ ANALİZ BAŞLAT BUTONU
-    ══════════════════════════════════════ */
+    ══════════════════════════════════ */
     [data-testid="stSidebar"] .stButton > button[kind="primary"] {
-        background: transparent !important;
-        color: #E5E5E5 !important;
-        border: 1px solid #3A3A3A !important;
-        border-radius: 8px !important;
-        padding: 0.55rem 1rem !important;
+        background: #0F172A !important;
+        color: #FFFFFF !important;
+        border: none !important;
+        border-radius: 10px !important;
+        padding: 0.6rem 1rem !important;
         font-weight: 500 !important;
         font-size: 0.875rem !important;
-        letter-spacing: 0px !important;
-        transition: background 0.15s ease, border-color 0.15s ease !important;
+        transition: background 0.18s ease, box-shadow 0.18s ease !important;
         width: 100% !important;
-        box-shadow: none !important;
-        text-align: left !important;
+        box-shadow: 0 1px 4px rgba(15,23,42,0.16) !important;
+        text-align: center !important;
+        letter-spacing: 0.1px !important;
     }
     [data-testid="stSidebar"] .stButton > button[kind="primary"]:hover {
-        background: #2A2A2A !important;
-        border-color: #4A4A4A !important;
+        background: #1E293B !important;
+        box-shadow: 0 4px 14px rgba(15,23,42,0.22) !important;
         transform: none !important;
-        box-shadow: none !important;
     }
 
-    /* ══════════════════════════════════════
-       GEÇMİŞ ANALİZ SATIRLARI — ChatGPT/Claude stili
-    ══════════════════════════════════════ */
-
-    /* Her satır: tam genişlik, hover'da arka plan */
+    /* ══════════════════════════════════
+       GEÇMİŞ SATIRLARI — hover reveal
+    ══════════════════════════════════ */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {
         position: relative !important;
-        border-radius: 8px !important;
-        padding: 1px 0 !important;
-        transition: background 0.15s ease !important;
-        margin-bottom: 1px !important;
+        border-radius: 9px !important;
+        padding: 0 !important;
+        margin-bottom: 2px !important;
+        transition: background 0.12s ease !important;
     }
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:hover {
-        background: #2A2A2A !important;
+        background: #EEF2F7 !important;
     }
 
-    /* Ana chat isim butonu */
-    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] > [data-testid="column"]:nth-child(1) .stButton > button {
+    /* İsim butonu */
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
+        > [data-testid="column"]:nth-child(1) .stButton > button {
         text-align: left !important;
-        padding: 9px 10px 9px 12px !important;
-        color: #C9C9C9 !important;
+        padding: 9px 6px 9px 11px !important;
+        color: #374151 !important;
         font-size: 0.875rem !important;
         font-weight: 400 !important;
-        border-radius: 8px !important;
+        border-radius: 9px !important;
         border: none !important;
         background: transparent !important;
-        transition: color 0.15s !important;
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
         box-shadow: none !important;
         width: 100% !important;
+        line-height: 1.4 !important;
+        transition: color 0.12s !important;
     }
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:hover
         > [data-testid="column"]:nth-child(1) .stButton > button {
-        color: #FFFFFF !important;
+        color: #0F172A !important;
         background: transparent !important;
     }
 
-    /* Aksiyon butonları: VARSAYILAN gizli */
+    /* İkon butonları — gizli */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
         > [data-testid="column"]:nth-child(2) .stButton > button,
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
@@ -147,18 +160,18 @@ st.markdown("""
         pointer-events: none !important;
         background: transparent !important;
         border: none !important;
-        border-radius: 6px !important;
-        padding: 6px 8px !important;
-        font-size: 0.8rem !important;
-        color: #888 !important;
-        transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease !important;
+        border-radius: 7px !important;
+        padding: 4px 6px !important;
+        font-size: 0.82rem !important;
+        color: #6B7280 !important;
         box-shadow: none !important;
+        height: 30px !important;
         min-height: unset !important;
-        height: 32px !important;
         line-height: 1 !important;
+        transition: opacity 0.12s ease, background 0.12s ease, color 0.12s ease !important;
     }
 
-    /* Aksiyon butonları: HOVER'DA görünür */
+    /* İkon butonları — hover'da görünür */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:hover
         > [data-testid="column"]:nth-child(2) .stButton > button,
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:hover
@@ -167,106 +180,131 @@ st.markdown("""
         pointer-events: auto !important;
     }
 
-    /* Düzenle butonu hover */
+    /* Kalem hover */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:hover
         > [data-testid="column"]:nth-child(2) .stButton > button:hover {
-        background: #383838 !important;
-        color: #FFFFFF !important;
+        background: #DBEAFE !important;
+        color: #1D4ED8 !important;
     }
 
-    /* Sil butonu hover: zarif kırmızı */
+    /* Çöp kutusu hover */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:hover
         > [data-testid="column"]:nth-child(3) .stButton > button:hover {
-        background: rgba(239, 68, 68, 0.15) !important;
-        color: #F87171 !important;
+        background: #FEE2E2 !important;
+        color: #DC2626 !important;
     }
 
-    /* ── DÜZENLEME MODU (Text Input + Kaydet) ── */
+    /* ── DÜZENLEME MODU ── */
     [data-testid="stSidebar"] .stTextInput input {
-        background: #2A2A2A !important;
-        border: 1px solid #4A4A4A !important;
-        border-radius: 7px !important;
-        color: #E5E5E5 !important;
+        background: #FFFFFF !important;
+        border: 1.5px solid #CBD5E1 !important;
+        border-radius: 8px !important;
+        color: #1E293B !important;
         font-size: 0.875rem !important;
         padding: 7px 10px !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
     }
     [data-testid="stSidebar"] .stTextInput input:focus {
-        border-color: #6B7280 !important;
-        box-shadow: 0 0 0 2px rgba(107,114,128,0.2) !important;
+        border-color: #6366F1 !important;
+        box-shadow: 0 0 0 3px rgba(99,102,241,0.12) !important;
     }
 
-    /* Kaydet Butonu — düz, yeşilimsi vurgu */
-    [data-testid="stSidebar"] .stButton > button[kind="primary"].save-btn,
-    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] ~ div .stButton > button[kind="primary"] {
-        background: #1A3A2A !important;
-        color: #6EE7B7 !important;
-        border: 1px solid #2D5A40 !important;
-        border-radius: 7px !important;
+    /* Kaydet / İptal */
+    [data-testid="stSidebar"] .stButton > button[kind="secondary"] {
         font-size: 0.8rem !important;
         font-weight: 500 !important;
-        padding: 6px 12px !important;
+        border-radius: 8px !important;
+        padding: 6px 10px !important;
+        border: 1.5px solid #E2E8F0 !important;
+        background: #FFFFFF !important;
+        color: #374151 !important;
         box-shadow: none !important;
-        transition: background 0.15s !important;
+        transition: all 0.15s !important;
+    }
+    [data-testid="stSidebar"] .stButton > button[kind="secondary"]:hover {
+        background: #F1F5F9 !important;
+        border-color: #CBD5E1 !important;
     }
 
-    /* ══════════════════════════════════════
+    /* ══════════════════════════════════
        MESAJ BALONLARI
-    ══════════════════════════════════════ */
-    [data-testid="stChatMessage"] { padding: 0.5rem 0 !important; }
+    ══════════════════════════════════ */
+    [data-testid="stChatMessage"] { padding: 0.4rem 0 !important; }
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) .stMarkdown {
-        background-color: #F1F5F9 !important;
-        border-radius: 18px !important;
-        padding: 10px 15px !important;
+        background: #F1F5F9 !important;
+        border-radius: 16px !important;
+        padding: 10px 16px !important;
     }
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) .stMarkdown {
-        background-color: #FFFFFF !important;
-        border: 1px solid #F1F5F9 !important;
-        border-radius: 18px !important;
-        padding: 10px 15px !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+        background: #FFFFFF !important;
+        border: 1px solid #E9EEF5 !important;
+        border-radius: 16px !important;
+        padding: 10px 16px !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04) !important;
     }
 
-    /* ══════════════════════════════════════
-       SIDEBAR TİPOGRAFİ
-    ══════════════════════════════════════ */
-    .sidebar-brand {
-        padding: 20px 16px 6px;
+    /* ══════════════════════════════════
+       SIDEBAR HTML PARÇALARI
+    ══════════════════════════════════ */
+    .sb-logo  { padding: 20px 2px 4px; display:flex; align-items:center; gap:9px; }
+    .sb-title { font-size:1rem; font-weight:600; color:#0F172A; margin:0; }
+    .sb-tag   { font-size:0.75rem; color:#94A3B8; padding:2px 2px 16px; font-style:italic; }
+    .sb-label {
+        font-size:0.68rem; font-weight:600; color:#9CA3AF;
+        letter-spacing:0.08em; text-transform:uppercase;
+        padding: 16px 2px 7px;
+    }
+    .sb-divider { border:none; border-top:1px solid #E5E7EB; margin:6px 0 12px; }
+
+    /* ══════════════════════════════════
+       SAĞ ALT KÖŞE — "Manage app" ÖRTÜCÜ
+    ══════════════════════════════════ */
+    .owner-badge {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        z-index: 999999;
+        background: #FFFFFF;
+        border-top: 1px solid #E2E8F0;
+        border-left: 1px solid #E2E8F0;
+        border-radius: 10px 0 0 0;
+        padding: 8px 16px 8px 12px;
         display: flex;
         align-items: center;
         gap: 8px;
+        pointer-events: none;
+        user-select: none;
+        min-width: 180px;
     }
-    .sidebar-brand-title {
-        font-size: 1rem;
+    .owner-badge .ob-dot {
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        background: #22C55E;
+        flex-shrink: 0;
+    }
+    .owner-badge .ob-name {
+        font-size: 0.8rem;
         font-weight: 600;
-        color: #E5E5E5;
-        margin: 0;
-        letter-spacing: -0.2px;
+        color: #0F172A;
+        font-family: 'DM Sans', sans-serif;
     }
-    .sidebar-tagline {
-        font-size: 0.75rem;
-        color: #6B7280;
-        padding: 0 16px 16px;
-        font-style: italic;
-    }
-    .sidebar-section-label {
+    .owner-badge .ob-role {
         font-size: 0.7rem;
-        font-weight: 600;
-        color: #4B5563;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        padding: 16px 16px 6px;
-    }
-    .sidebar-owner {
-        font-size: 0.82rem;
-        color: #9CA3AF;
-        padding: 0 16px 12px;
-    }
-    .sidebar-divider {
-        border: none;
-        border-top: 1px solid #2A2A2A;
-        margin: 4px 0 8px;
+        color: #94A3B8;
+        font-family: 'DM Sans', sans-serif;
+        display: block;
+        line-height: 1.2;
     }
 </style>
+
+<!-- Sağ alt köşe — "Manage app" üzerini tam örter -->
+<div class="owner-badge">
+    <div class="ob-dot"></div>
+    <div>
+        <span class="ob-name">Merve [Soyadı]</span>
+        <span class="ob-role">Proje Sahibi · Siber Hukuk</span>
+    </div>
+</div>
 """, unsafe_allow_html=True)
 
 # ==========================================
@@ -297,45 +335,41 @@ if "edit_id" not in st.session_state:
     st.session_state.edit_id = None
 
 # ==========================================
-# 6. SOL MENÜ — MODERN AI SİDEBAR
+# 6. SOL MENÜ
 # ==========================================
 with st.sidebar:
-    # Marka başlığı
     st.markdown("""
-        <div class='sidebar-brand'>
-            <span style='font-size:1.15rem;'>⚖️</span>
-            <p class='sidebar-brand-title'>Siber Asistan</p>
+        <div class='sb-logo'>
+            <span style='font-size:1.25rem'>⚖️</span>
+            <p class='sb-title'>Siber Asistan</p>
         </div>
-        <p class='sidebar-tagline'>Dijital dünyada adaletin rehberi.</p>
+        <p class='sb-tag'>Dijital dünyada adaletin rehberi.</p>
+        <div class='sb-label'>Proje Sahibi</div>
+        <p style='font-size:0.85rem;color:#374151;padding:0 2px 8px;font-weight:500;'>
+            👤 Merve [Soyadı]
+        </p>
+        <hr class='sb-divider'/>
     """, unsafe_allow_html=True)
 
-    # Proje sahibi
-    st.markdown("<div class='sidebar-section-label'>Proje Sahibi</div>", unsafe_allow_html=True)
-    st.markdown("<div class='sidebar-owner'>👤 Merve [Soyadı]</div>", unsafe_allow_html=True)
-
-    st.markdown("<hr class='sidebar-divider'/>", unsafe_allow_html=True)
-
-    # Yeni analiz butonu
     if st.button("＋  Yeni Analiz Başlat", type="primary", use_container_width=True):
         st.session_state.current_chat_id = datetime.now().strftime("%Y%m%d_%H%M%S")
         st.session_state.messages = []
         st.session_state.chat_session = model.start_chat(history=[])
         st.rerun()
 
-    # Geçmiş analizler başlığı
-    st.markdown("<div class='sidebar-section-label' style='margin-top:20px;'>Geçmiş Analizler</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sb-label'>Geçmiş Analizler</div>", unsafe_allow_html=True)
 
     t_db = db.copy()
     for cid in sorted(t_db.keys(), reverse=True):
         if st.session_state.edit_id == cid:
-            # ── DÜZENLEME MODU ──────────────────────────
+            # ── Düzenleme modu ────────────────────
             new_val = st.text_input(
-                "Yeniden adlandır",
+                "Ad",
                 value=t_db[cid][0].get("title", t_db[cid][0]["content"][:20]),
                 key=f"r_{cid}",
                 label_visibility="collapsed"
             )
-            col_save, col_cancel = st.columns([1, 1], gap="small")
+            col_save, col_cancel = st.columns(2, gap="small")
             with col_save:
                 if st.button("✓ Kaydet", type="primary", key=f"s_{cid}", use_container_width=True):
                     t_db[cid][0]["title"] = new_val
@@ -347,25 +381,22 @@ with st.sidebar:
                     st.session_state.edit_id = None
                     st.rerun()
         else:
-            # ── NORMAL GÖRÜNÜM ───────────────────────────
-            # Sütun oranları: geniş isim alanı, iki küçük ikon
+            # ── Normal görünüm ───────────────────
             c1, c2, c3 = st.columns([0.72, 0.14, 0.14], gap="small")
             with c1:
-                display_t = t_db[cid][0].get("title", t_db[cid][0]["content"][:22] + "…")
+                display_t = t_db[cid][0].get("title", t_db[cid][0]["content"][:24] + "…")
                 is_active = (st.session_state.current_chat_id == cid)
-                btn_label = f"{'◉ ' if is_active else ''}{display_t}"
-                if st.button(btn_label, key=f"ch_{cid}", use_container_width=True):
+                label = f"{'· ' if is_active else ''}{display_t}"
+                if st.button(label, key=f"ch_{cid}", use_container_width=True):
                     st.session_state.current_chat_id = cid
                     st.session_state.messages = t_db[cid]
                     st.rerun()
             with c2:
-                # Kalem ikonu — yeniden adlandır
                 if st.button("✎", key=f"e_{cid}", help="Yeniden Adlandır"):
                     st.session_state.edit_id = cid
                     st.rerun()
             with c3:
-                # Çöp kutusu — sil
-                if st.button("⌫", key=f"d_{cid}", help="Sohbeti Sil"):
+                if st.button("🗑", key=f"d_{cid}", help="Sohbeti Sil"):
                     del t_db[cid]
                     save_db(t_db)
                     if st.session_state.current_chat_id == cid:
@@ -374,12 +405,12 @@ with st.sidebar:
                     st.rerun()
 
 # ==========================================
-# 7. ANA EKRAN & MESAJLAŞMA
+# 7. ANA EKRAN
 # ==========================================
 if not st.session_state.messages:
     st.markdown('<h1 class="portal-title">Siber Hukuk Portalı</h1>', unsafe_allow_html=True)
     st.markdown(
-        '<p style="text-align:center; color:#64748B; font-size:1rem; margin-top:0.5rem;">'
+        '<p style="text-align:center;color:#64748B;font-size:1rem;margin-top:0.4rem;">'
         'Hukuki vakayı veya sormak istediğiniz dijital hakları aşağıya yazın.</p>',
         unsafe_allow_html=True
     )
@@ -399,7 +430,7 @@ if prompt := st.chat_input("Hukuki vakayı yazın..."):
 
     with st.chat_message("assistant", avatar="⚖️"):
         st.markdown(
-            '<p style="color:#94A3B8; font-style:italic; font-size:0.85rem;">⚖️ Analiz ediliyor…</p>',
+            '<p style="color:#94A3B8;font-style:italic;font-size:0.85rem;">⚖️ Analiz ediliyor…</p>',
             unsafe_allow_html=True
         )
         try:
@@ -408,14 +439,14 @@ if prompt := st.chat_input("Hukuki vakayı yazın..."):
 
             st.empty()
             full_res = ""
-            message_placeholder = st.empty()
+            placeholder = st.empty()
 
             for chunk in res:
                 full_res += chunk.text
-                message_placeholder.markdown(full_res + "▌")
+                placeholder.markdown(full_res + "▌")
                 time.sleep(0.01)
 
-            message_placeholder.markdown(full_res)
+            placeholder.markdown(full_res)
 
             if len(st.session_state.messages) == 1:
                 st.session_state.messages[0]["title"] = prompt[:28]
