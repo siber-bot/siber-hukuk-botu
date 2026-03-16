@@ -33,7 +33,7 @@ def save_db(data):
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 # ==========================================
-# 3. ÖZEL CSS (MODERN AI ARAYÜZÜ)
+# 3. ÖZEL CSS (GERÇEK YAPAY ZEKA ARAYÜZÜ)
 # ==========================================
 st.markdown("""
 <style>
@@ -64,50 +64,73 @@ st.markdown("""
     }
 
     /* ========================================= */
-    /* MODERN CHAT LİSTESİ (CHATGPT/CLAUDE STİLİ)*/
+    /* SİDEBAR BUTONLARINI MODERNLEŞTİRME        */
     /* ========================================= */
     
-    /* Ana Chat Butonu */
-    div[data-testid="column"]:nth-of-type(1) div.stButton > button {
-        text-align: left !important;
-        width: 100% !important;
+    /* 1. Kırmızı "Primary" Butonu -> Kurumsal Laciverte Çevir */
+    [data-testid="stSidebar"] .stButton > button[kind="primary"] {
+        background: #1E293B !important; /* Koyu Lacivert */
+        color: #FFFFFF !important;
         border: none !important;
-        background: transparent !important; 
-        padding: 6px 10px !important;
-        border-radius: 6px !important;
-        color: #374151 !important;
-        font-weight: 400 !important;
-        font-size: 0.9rem !important;
+        border-radius: 8px !important;
+        padding: 0.6rem 1rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.5px !important;
         transition: all 0.2s ease !important;
-        box-shadow: none !important;
+        width: 100% !important;
     }
-    div[data-testid="column"]:nth-of-type(1) div.stButton > button:hover {
-        background-color: #E5E7EB !important;
+    [data-testid="stSidebar"] .stButton > button[kind="primary"]:hover {
+        background: #334155 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    }
+
+    /* 2. Tüm kaba çerçeveleri "Secondary" butonlardan sil */
+    [data-testid="stSidebar"] .stButton > button[kind="secondary"] {
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+    }
+
+    /* 3. Kolonlar arasındaki boşlukları sıfırla (Bütünlük hissi için) */
+    [data-testid="stHorizontalBlock"] {
+        gap: 0rem !important;
+        align-items: center !important;
+    }
+
+    /* 4. Geçmiş Analiz Metni (Sola Yaslı) */
+    [data-testid="column"]:nth-child(1) .stButton > button[kind="secondary"] {
+        text-align: left !important;
+        padding: 8px 12px !important;
+        color: #374151 !important;
+        font-size: 0.95rem !important;
+        font-weight: 400 !important;
+        border-radius: 6px !important;
+    }
+    [data-testid="column"]:nth-child(1) .stButton > button[kind="secondary"]:hover {
+        background: #E5E7EB !important;
         color: #111827 !important;
     }
 
-    /* Aksiyon Butonları (Düzenle ve Sil) */
-    div[data-testid="column"]:nth-of-type(2) div.stButton > button,
-    div[data-testid="column"]:nth-of-type(3) div.stButton > button {
-        border: none !important;
-        background: transparent !important;
-        box-shadow: none !important;
-        padding: 6px 0 !important;
+    /* 5. İkon Butonları (Düzenle ve Sil) - Şeffaf ve Renk Değiştiren */
+    [data-testid="column"]:nth-child(2) .stButton > button[kind="secondary"],
+    [data-testid="column"]:nth-child(3) .stButton > button[kind="secondary"] {
+        padding: 8px 0 !important;
         color: #9CA3AF !important;
         font-size: 1.1rem !important;
-        font-weight: bold !important;
-        opacity: 0.4;
-        transition: all 0.2s !important;
     }
-    /* Üzerine gelince belirginleşme */
-    div[data-testid="column"]:nth-of-type(2) div.stButton > button:hover {
-        opacity: 1; color: #3B82F6 !important;
+    [data-testid="column"]:nth-child(2) .stButton > button[kind="secondary"]:hover {
+        color: #3B82F6 !important; /* Mavi Kalem */
+        background: transparent !important;
     }
-    div[data-testid="column"]:nth-of-type(3) div.stButton > button:hover {
-        opacity: 1; color: #EF4444 !important;
+    [data-testid="column"]:nth-child(3) .stButton > button[kind="secondary"]:hover {
+        color: #EF4444 !important; /* Kırmızı Çarpı */
+        background: transparent !important;
     }
 
-    /* Mesaj Balonları */
+    /* ========================================= */
+    /* MESAJ BALONLARI                           */
+    /* ========================================= */
     [data-testid="stChatMessage"] { padding: 0.5rem 0 !important; }
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) .stMarkdown {
         background-color: #F3F4F6 !important; border-radius: 20px !important; padding: 10px 15px !important;
@@ -127,7 +150,7 @@ SISTEM_PROMPTU = "Sen uzman bir Siber Hukuk Asistanısın. Yanıtlarını resmi,
 try:
     API_KEY = st.secrets["GEMINI_API_KEY"]
     genai.configure(api_key=API_KEY)
-    # Model koruması aktif
+    # Model ismi korundu
     model = genai.GenerativeModel('gemini-3-flash-preview') 
 except Exception as e:
     st.error("API Hatası! Lütfen Streamlit ayarlarını kontrol edin.")
@@ -177,8 +200,8 @@ with st.sidebar:
                 st.session_state.edit_id = None
                 st.rerun()
         else:
-            # Modern, dar kolon yapısı (Sadece ikonlara yer ayırır)
-            c1, c2, c3 = st.columns([0.76, 0.12, 0.12])
+            # Modern, boşluksuz kolon yapısı
+            c1, c2, c3 = st.columns([0.76, 0.12, 0.12], gap="small")
             with c1:
                 display_t = t_db[cid][0].get("title", t_db[cid][0]["content"][:22] + "...")
                 # Emoji kaldırıldı, sadece düz ve şık metin kaldı
