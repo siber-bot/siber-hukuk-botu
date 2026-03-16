@@ -33,88 +33,66 @@ def save_db(data):
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 # ==========================================
-# 3. ÖZEL CSS (MENÜYÜ ZORLA GÖRÜNÜR YAPAN FİX)
+# 3. ÖZEL CSS (SABİT SİDEBAR & RESMİ UI)
 # ==========================================
 st.markdown("""
 <style>
-    /* ANA UYGULAMA TEMA AYARLARI */
     .stApp, .main { background-color: #FFFFFF !important; }
     header[data-testid="stHeader"] { display: none !important; }
     [data-testid="stToolbar"] { display: none !important; }
 
-    /* --- SİHİRLİ DOKUNUŞ: SİDEBAR'I ZORLA AÇIK TUT --- */
+    /* SİDEBAR'I ZORLA AÇIK TUTAN MODERN YAPI */
     section[data-testid="stSidebar"] { 
-        background-color: #F1F5F9 !important; /* Arka plan hafif gri */
+        background-color: #F8FAFC !important; 
         border-right: 1px solid #E2E8F0 !important;
         min-width: 320px !important;
         max-width: 320px !important;
-        transform: none !important; /* GİZLENMESİNİ KESİNLİKLE ENGELLER */
-        visibility: visible !important; /* GÖRÜNÜRLÜĞÜ ZORUNLU KILAR */
+        transform: none !important;
+        visibility: visible !important;
         display: block !important;
     }
     
-    /* Streamlit'in içteki beyaz maskesini şeffaf yap */
-    section[data-testid="stSidebar"] > div:first-child {
-        background-color: transparent !important; 
-    }
+    section[data-testid="stSidebar"] > div:first-child { background-color: transparent !important; }
 
-    /* AÇ/KAPAT BUTONLARINI TAMAMEN SİL */
-    button[data-testid="stSidebarCollapseButton"],
-    [data-testid="collapsedControl"] { 
-        display: none !important; 
-    }
+    /* Butonları Gizle */
+    button[data-testid="stSidebarCollapseButton"], [data-testid="collapsedControl"] { display: none !important; }
 
-    /* ANA İÇERİK HİZALAMASI (Menünün genişliğine göre) */
-    .block-container { 
-        padding-top: 2.5rem !important; 
-        max-width: 850px !important; 
-        margin: 0 auto !important; 
-    }
+    .block-container { padding-top: 2.5rem !important; max-width: 850px !important; margin: 0 auto !important; }
 
-    .portal-title {
-        text-align: center;
-        font-weight: 800;
-        font-size: 2.2rem;
-        color: #0F172A;
-        margin-top: 0;
-    }
+    .portal-title { text-align: center; font-weight: 800; font-size: 2.2rem; color: #0F172A; margin-top: 0; pointer-events: none; }
 
-    /* GEÇMİŞ SOHBET BUTONLARI (Gri zemin üstünde beyaz kartlar) */
+    /* GEÇMİŞ SOHBET LİSTESİ TASARIMI */
     div[data-testid="stVerticalBlock"] div.stButton > button {
         text-align: left !important;
         width: 100% !important;
-        border: 1px solid #E2E8F0 !important;
-        background: #FFFFFF !important; 
+        border: none !important;
+        background: transparent !important; 
         padding: 10px 14px !important;
-        border-radius: 8px !important;
-        color: #334155 !important;
+        border-radius: 10px !important;
+        color: #475569 !important;
         font-weight: 500 !important;
         transition: all 0.2s ease !important;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.03) !important;
     }
     div[data-testid="stVerticalBlock"] div.stButton > button:hover {
-        border-color: #CBD5E1 !important;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
-        transform: translateY(-1px);
-        color: #0F172A !important;
-    }
-    
-    hr {
-        margin: 1.5rem 0 !important;
-        border-bottom: 1px solid #CBD5E1 !important;
+        background-color: #F1F5F9 !important;
+        color: #1E293B !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 4. API VE MODEL
+# 4. API VE MODEL (KORUNAN AYAR)
 # ==========================================
+SISTEM_PROMPTU = "Sen uzman bir Siber Hukuk Asistanısın. Yanıtlarını resmi, madde işaretli ve Türkiye yasalarına dayandırarak ver."
+
 try:
     API_KEY = st.secrets["GEMINI_API_KEY"]
     genai.configure(api_key=API_KEY)
-    model = genai.GenerativeModel('gemini-3-flash') 
-except:
-    st.error("API Secret Hatası! Lütfen Streamlit ayarlarını kontrol edin.")
+    
+    # KORUNAN AYAR: gemini-3-flash-preview (Doğru İsim Budur)
+    model = genai.GenerativeModel('gemini-3-flash-preview') 
+except Exception as e:
+    st.error(f"Sistem Başlatılamadı: {str(e)}")
     st.stop()
 
 # ==========================================
@@ -132,14 +110,14 @@ if "edit_id" not in st.session_state:
     st.session_state.edit_id = None
 
 # ==========================================
-# 6. SOL MENÜ (KUSURSUZ SABİT SİDEBAR)
+# 6. SOL MENÜ
 # ==========================================
 with st.sidebar:
-    st.markdown("<h2 style='color:#0F172A; margin-top:0px; margin-bottom:5px; font-weight:800;'>⚖️ Siber Asistan</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='font-size:0.85rem; color:#3B82F6; font-style:italic; margin-bottom:25px;'>Dijital dünyada adaletin rehberi.</p>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color:#0F172A; margin:0; font-weight:800;'>⚖️ Siber Asistan</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size:0.85rem; color:#3B82F6; font-style:italic; margin-bottom:20px;'>Dijital dünyada adaletin rehberi.</p>", unsafe_allow_html=True)
     
-    st.markdown("<p style='font-size:0.75rem; color:#64748B; font-weight:700; margin-bottom:5px; letter-spacing: 0.5px;'>PROJE SAHİBİ</p>", unsafe_allow_html=True)
-    st.markdown("👤 **Merve Soyadı**")
+    st.markdown("<p style='font-size:0.7rem; color:#64748B; font-weight:700; margin-bottom:0;'>PROJE SAHİBİ</p>", unsafe_allow_html=True)
+    st.markdown("👤 **Merve [Soyadı]**")
     
     st.divider()
     
@@ -149,19 +127,19 @@ with st.sidebar:
         st.session_state.chat_session = model.start_chat(history=[])
         st.rerun()
 
-    st.markdown("<p style='font-size:0.75rem; color:#64748B; font-weight:700; margin-top:25px; margin-bottom:15px; letter-spacing: 0.5px;'>GEÇMİŞ ANALİZLER</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size:0.7rem; color:#64748B; font-weight:700; margin-top:20px; margin-bottom:10px;'>GEÇMİŞ ANALİZLER</p>", unsafe_allow_html=True)
     
     t_db = db.copy()
     for cid in sorted(t_db.keys(), reverse=True):
         if st.session_state.edit_id == cid:
-            new_val = st.text_input("Düzenle", value=t_db[cid][0].get("title", t_db[cid][0]["content"][:15]), key=f"r_{cid}", label_visibility="collapsed")
-            if st.button("💾 Kaydet", key=f"s_{cid}", use_container_width=True):
+            new_val = st.text_input("D", value=t_db[cid][0].get("title", t_db[cid][0]["content"][:15]), key=f"r_{cid}", label_visibility="collapsed")
+            if st.button("💾", key=f"s_{cid}"):
                 t_db[cid][0]["title"] = new_val
                 save_db(t_db)
                 st.session_state.edit_id = None
                 st.rerun()
         else:
-            c1, c2, c3 = st.columns([0.65, 0.15, 0.20])
+            c1, c2, c3 = st.columns([0.7, 0.15, 0.15])
             with c1:
                 display_t = t_db[cid][0].get("title", t_db[cid][0]["content"][:18] + "...")
                 if st.button(f"💬 {display_t}", key=f"ch_{cid}", use_container_width=True):
@@ -169,23 +147,22 @@ with st.sidebar:
                     st.session_state.messages = t_db[cid]
                     st.rerun()
             with c2:
-                if st.button("✏️", key=f"e_{cid}", help="Yeniden Adlandır"):
+                if st.button("✏️", key=f"e_{cid}"):
                     st.session_state.edit_id = cid
                     st.rerun()
             with c3:
-                if st.button("🗑️", key=f"d_{cid}", help="Sil"):
+                if st.button("🗑️", key=f"d_{cid}"):
                     del t_db[cid]
                     save_db(t_db)
-                    if st.session_state.current_chat_id == cid: 
-                        st.session_state.messages = []
+                    if st.session_state.current_chat_id == cid: st.session_state.messages = []
                     st.rerun()
 
 # ==========================================
-# 7. ANA EKRAN & MESAJLAŞMA
+# 7. ANA EKRAN
 # ==========================================
 if not st.session_state.messages:
     st.markdown('<h1 class="portal-title">Siber Hukuk Portalı</h1>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align:center; color:#64748B; font-size:1.1rem;">Hukuki vakayı veya sormak istediğiniz dijital hakları aşağıya yazın.</p>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align:center; color:#64748B;">Analiz için vaka detaylarını aşağıya yazın.</p>', unsafe_allow_html=True)
 
 for msg in st.session_state.messages:
     av = "👤" if msg["role"] == "user" else "⚖️"
@@ -193,7 +170,7 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # ==========================================
-# 8. SOHBET GİRDİSİ VE ANALİZ
+# 8. ANALİZ VE SOFT STREAMING
 # ==========================================
 if prompt := st.chat_input("Hukuki vakayı yazın..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
@@ -201,25 +178,28 @@ if prompt := st.chat_input("Hukuki vakayı yazın..."):
         st.markdown(prompt)
 
     with st.chat_message("assistant", avatar="⚖️"):
+        st.markdown('<p style="color:#94A3B8; font-style:italic; font-size:0.85rem;">⚖️ Analiz ediliyor...</p>', unsafe_allow_html=True)
         try:
-            res = st.session_state.chat_session.send_message(prompt, stream=True)
+            # Sistem promptunu soruya gömüyoruz
+            tam_prompt = f"GİZLİ SİSTEM KOMUTU: {SISTEM_PROMPTU}\n\nSORU: {prompt}"
+            res = st.session_state.chat_session.send_message(tam_prompt, stream=True)
             
             full_res = ""
-            message_placeholder = st.empty()
+            ph = st.empty()
             
             for chunk in res:
                 full_res += chunk.text
-                message_placeholder.markdown(full_res + "▌")
+                ph.markdown(full_res + "▌")
                 time.sleep(0.01)
             
-            message_placeholder.markdown(full_res)
+            ph.markdown(full_res)
             
+            # Başlık atama (ilk mesajsa)
             if len(st.session_state.messages) == 1:
-                st.session_state.messages[0]["title"] = prompt[:25]
-                
+                st.session_state.messages[0]["title"] = prompt[:20]
+
             st.session_state.messages.append({"role": "assistant", "content": full_res})
             db[st.session_state.current_chat_id] = st.session_state.messages
             save_db(db)
-            
         except Exception as e:
-            st.error("Model bağlantısında bir hata oluştu.")
+            st.error("Model bağlantısı kurulamadı. Lütfen API kotanızı kontrol edin.")
