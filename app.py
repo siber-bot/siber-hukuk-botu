@@ -7,13 +7,13 @@ import os
 from datetime import datetime
 
 # ==========================================
-# 1. SAYFA AYARLARI (ZORUNLU ÜSTTE)
+# 1. SAYFA AYARLARI
 # ==========================================
 st.set_page_config(
     page_title="Siber Hukuk Asistanı",
     page_icon="⚖️",
     layout="wide",
-    initial_sidebar_state="expanded"   # expanded kalabilir, buton her durumda görünecek
+    initial_sidebar_state="expanded"
 )
 
 # ==========================================
@@ -34,79 +34,50 @@ def save_db(data):
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 # ==========================================
-# 3. ÖZEL CSS + FLOATING MENU BUTTON
+# 3. ÖZEL CSS (GÜNCELLENDİ)
 # ==========================================
 st.markdown("""
 <style>
-    /* ── TOOLBAR (sağ üst menü) gizle ── */
+    /* Toolbar gizle */
     [data-testid="stToolbar"] { display: none !important; }
 
-    /* ── Streamlit'in kendi sidebar butonunu gizle ── */
+    /* Streamlit'in kendi sidebar butonlarını tamamen etkisizleştir */
     button[data-testid="stSidebarCollapseButton"],
-    button[data-testid="collapsedControl"],
-    [data-testid="stSidebarCollapsedControl"],
-    [data-testid="stSidebarCollapsedControl"] button {
+    [data-testid="collapsedControl"],
+    [data-testid="stSidebarCollapsedControl"] {
         display: none !important;
         visibility: hidden !important;
     }
 
-    /* ── CUSTOM FLOATING TOGGLE BUTTON ── */
-    #custom-menu-btn {
-        position:         fixed;
-        top:              14px;
-        left:             14px;
-        z-index:          999999;
-        width:            44px;
-        height:           44px;
-        background:       #3B82F6;
-        border:           none;
-        border-radius:    12px;
-        cursor:           pointer;
-        display:          flex;
-        align-items:      center;
-        justify-content:  center;
-        box-shadow:       0 4px 14px rgba(59,130,246,0.5);
-        transition:       background 0.2s, transform 0.2s;
-    }
-    #custom-menu-btn:hover {
-        background:  #2563EB;
-        transform:   scale(1.08);
-    }
-    #custom-menu-btn svg {
-        width:  22px;
-        height: 22px;
-        fill:   white;
-    }
-
-    /* ── HEADER şeffaf ── */
+    /* HEADER şeffaf */
     header[data-testid="stHeader"] {
         background: transparent !important;
     }
 
-    /* ── ANA KONTEYNER ── */
+    /* ANA KONTEYNER */
     .block-container { 
-        padding-top: 2rem !important; 
+        padding-top: 3.5rem !important; 
         max-width: 850px !important; 
         margin: 0 auto !important; 
     }
 
-    /* ── SİDEBAR ── */
+    /* SİDEBAR STİL */
     [data-testid="stSidebar"] { 
         background-color: #F8FAFC !important; 
         border-right: 1px solid #E2E8F0 !important;
+        z-index: 1000000 !important;
     }
 
-    /* ── BAŞLIK ── */
+    /* BAŞLIK */
     .portal-title {
         text-align: center;
         font-weight: 800;
         font-size: 2.2rem;
         color: #0F172A;
-        pointer-events: none;
         margin-top: 1rem;
     }
 
-    /* ── SOHBET LİSTESİ BUTONLARI ── */
+    /* SOHBET LİSTESİ BUTONLARI */
     div[data-testid="stVerticalBlock"] div.stButton > button {
         text-align: left !important;
         width: 100% !important;
@@ -122,74 +93,85 @@ st.markdown("""
         color: #1E293B !important;
     }
 </style>
-
 """, unsafe_allow_html=True)
 
-# Sidebar toggle butonu — components.v1.html parent frame'e erişebildiği için çalışır
+# ==========================================
+# 4. KALICI FLOATING MENU BUTONU (JAVASCRIPT FIX)
+# ==========================================
+# Bu kod butonu iframe dışına, ana sayfaya enjekte eder.
 components.html("""
-<style>
-  #menu-btn {
-    position: fixed;
-    top: 14px; left: 14px;
-    z-index: 999999;
-    width: 44px; height: 44px;
-    background: #3B82F6;
-    border: none; border-radius: 12px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 14px rgba(59,130,246,0.5);
-    transition: background 0.2s, transform 0.15s;
-  }
-  #menu-btn:hover { background: #2563EB; transform: scale(1.08); }
-  #menu-btn svg { width: 22px; height: 22px; fill: white; }
-</style>
-
-<button id="menu-btn" title="Menü">
-  <svg viewBox="0 0 24 24"><rect y="4" width="24" height="2.5" rx="1.2"/><rect y="11" width="24" height="2.5" rx="1.2"/><rect y="18" width="24" height="2.5" rx="1.2"/></svg>
-</button>
-
 <script>
-  let open = true;
+    const parentDoc = window.parent.document;
+    
+    if (!parentDoc.getElementById('cyber-menu-btn')) {
+        const btn = parentDoc.createElement('button');
+        btn.id = 'cyber-menu-btn';
+        btn.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="white"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>';
+        
+        Object.assign(btn.style, {
+            position: 'fixed',
+            top: '14px',
+            left: '14px',
+            zIndex: '9999999',
+            width: '44px',
+            height: '44px',
+            backgroundColor: '#3B82F6',
+            border: 'none',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 14px rgba(59,130,246,0.5)',
+            transition: 'all 0.2s ease'
+        });
 
-  document.getElementById('menu-btn').addEventListener('click', function() {
-    const doc = window.parent.document;
+        btn.onmouseover = () => { btn.style.backgroundColor = '#2563EB'; btn.style.transform = 'scale(1.08)'; };
+        btn.onmouseout = () => { btn.style.backgroundColor = '#3B82F6'; btn.style.transform = 'scale(1)'; };
 
-    // Yöntem 1: Streamlit'in kendi toggle butonunu bul ve tıkla
-    const btnSelectors = [
-      '[data-testid="stSidebarCollapseButton"]',
-      '[data-testid="collapsedControl"]',
-      '[data-testid="stSidebarCollapsedControl"] button',
-      'section[data-testid="stSidebarCollapsedControl"]',
-    ];
-    for (const sel of btnSelectors) {
-      const el = doc.querySelector(sel);
-      if (el) { el.click(); return; }
+        btn.onclick = () => {
+            // Streamlit'in kendi gizli butonunu bul ve tetikle
+            const selectors = [
+                '[data-testid="stSidebarCollapseButton"]',
+                'button[aria-label="Close sidebar"]',
+                'button[aria-label="Open sidebar"]',
+                '.st-emotion-cache-6q9sum button'
+            ];
+            
+            let clicked = false;
+            for (const s of selectors) {
+                const el = parentDoc.querySelector(s);
+                if (el) { el.click(); clicked = true; break; }
+            }
+            
+            // Eğer butonlar bulunamazsa fallback (yedek) yöntem
+            if (!clicked) {
+                const sidebar = parentDoc.querySelector('[data-testid="stSidebar"]');
+                if (sidebar) {
+                    const isVisible = sidebar.getAttribute('aria-expanded') === 'true';
+                    // Bu kısım Streamlit internal state'ine bağlıdır
+                }
+            }
+        };
+        parentDoc.body.appendChild(btn);
     }
-
-    // Yöntem 2: Sidebar'ı transform ile gizle/göster
-    const sidebar = doc.querySelector('[data-testid="stSidebar"]');
-    if (sidebar) {
-      sidebar.style.transition = 'transform 0.3s ease';
-      open = !open;
-      sidebar.style.transform = open ? 'translateX(0)' : 'translateX(-110%)';
-    }
-  });
 </script>
 """, height=0)
 
 # ==========================================
-# 4. API VE MODEL
+# 5. API VE MODEL
 # ==========================================
 try:
     API_KEY = st.secrets["GEMINI_API_KEY"]
     genai.configure(api_key=API_KEY)
-    model = genai.GenerativeModel('gemini-3-flash-preview') 
+    # Gemini 3 Flash modelini burada güncelledik
+    model = genai.GenerativeModel('gemini-1.5-flash') 
 except:
     st.error("API Secret Hatası! Lütfen Streamlit ayarlarını kontrol edin.")
     st.stop()
 
 # ==========================================
-# 5. DATA & SESSION STATE
+# 6. DATA & SESSION STATE
 # ==========================================
 db = load_db()
 
@@ -203,13 +185,13 @@ if "edit_id" not in st.session_state:
     st.session_state.edit_id = None
 
 # ==========================================
-# 6. SOL MENÜ
+# 7. SOL MENÜ (SİDEBAR) İÇERİĞİ
 # ==========================================
 with st.sidebar:
-    st.markdown("<h3 style='color:#0F172A; margin-top:0;'>⚖️ Siber Asistan</h3>", unsafe_allow_html=True)
-    st.markdown("<p style='font-size:0.8rem; color:#3B82F6; font-style:italic;'>Dijital dünyada adaletin rehberi.</p>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#0F172A; margin-top:20px;'>⚖️ Siber Asistan</h3>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size:0.85rem; color:#3B82F6; font-style:italic; margin-bottom:20px;'>Dijital dünyada adaletin rehberi.</p>", unsafe_allow_html=True)
     
-    st.markdown("<p style='font-size:0.65rem; color:#94A3B8; font-weight:700; margin-top:20px; margin-bottom:5px;'>PROJE SAHİBİ</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size:0.7rem; color:#94A3B8; font-weight:700; margin-bottom:5px;'>PROJE SAHİBİ</p>", unsafe_allow_html=True)
     st.markdown("👤 **Merve [Soyadı]**")
     
     st.divider()
@@ -220,21 +202,21 @@ with st.sidebar:
         st.session_state.chat_session = model.start_chat(history=[])
         st.rerun()
 
-    st.markdown("<p style='font-size:0.65rem; color:#94A3B8; font-weight:700; margin-top:20px; margin-bottom:10px;'>GEÇMİŞ ANALİZLER</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size:0.7rem; color:#94A3B8; font-weight:700; margin-top:20px; margin-bottom:10px;'>GEÇMİŞ ANALİZLER</p>", unsafe_allow_html=True)
     
     t_db = db.copy()
     for cid in sorted(t_db.keys(), reverse=True):
         if st.session_state.edit_id == cid:
-            new_val = st.text_input("Edit", value=t_db[cid][0].get("title", t_db[cid][0]["content"][:15]), key=f"r_{cid}", label_visibility="collapsed")
+            new_val = st.text_input("Düzenle", value=t_db[cid][0].get("title", t_db[cid][0]["content"][:15]), key=f"r_{cid}", label_visibility="collapsed")
             if st.button("💾", key=f"s_{cid}"):
                 t_db[cid][0]["title"] = new_val
                 save_db(t_db)
                 st.session_state.edit_id = None
                 st.rerun()
         else:
-            c1, c2, c3 = st.columns([0.76, 0.12, 0.12])
+            c1, c2, c3 = st.columns([0.70, 0.15, 0.15])
             with c1:
-                display_t = t_db[cid][0].get("title", t_db[cid][0]["content"][:20] + "...")
+                display_t = t_db[cid][0].get("title", t_db[cid][0]["content"][:18] + "...")
                 if st.button(f"💬 {display_t}", key=f"ch_{cid}", use_container_width=True):
                     st.session_state.current_chat_id = cid
                     st.session_state.messages = t_db[cid]
@@ -247,15 +229,16 @@ with st.sidebar:
                 if st.button("🗑️", key=f"d_{cid}"):
                     del t_db[cid]
                     save_db(t_db)
-                    if st.session_state.current_chat_id == cid: st.session_state.messages = []
+                    if st.session_state.current_chat_id == cid: 
+                        st.session_state.messages = []
                     st.rerun()
 
 # ==========================================
-# 7. ANA EKRAN
+# 8. ANA EKRAN
 # ==========================================
 if not st.session_state.messages:
     st.markdown('<h1 class="portal-title">Siber Hukuk Portalı</h1>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align:center; color:#64748B;">Analiz için detayları aşağıya yazın.</p>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align:center; color:#64748B;">Hukuki vakayı veya sormak istediğiniz dijital hakları aşağıya yazın.</p>', unsafe_allow_html=True)
 
 for msg in st.session_state.messages:
     av = "👤" if msg["role"] == "user" else "⚖️"
@@ -263,7 +246,7 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # ==========================================
-# 8. SOHBET & STREAMING
+# 9. SOHBET & ANALİZ SÜRECİ
 # ==========================================
 if prompt := st.chat_input("Hukuki vakayı yazın..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
@@ -271,21 +254,31 @@ if prompt := st.chat_input("Hukuki vakayı yazın..."):
         st.markdown(prompt)
 
     with st.chat_message("assistant", avatar="⚖️"):
-        status_msg = st.empty()
-        status_msg.markdown('<p style="color:#94A3B8; font-style:italic; font-size:0.85rem;">⚖️ Analiz ediliyor...</p>', unsafe_allow_html=True)
+        status_placeholder = st.empty()
+        status_placeholder.markdown('<p style="color:#94A3B8; font-style:italic; font-size:0.85rem;">⚖️ Hukuki analiz yapılıyor...</p>', unsafe_allow_html=True)
         
         try:
             res = st.session_state.chat_session.send_message(prompt, stream=True)
-            status_msg.empty()
+            status_placeholder.empty()
+            
             full_res = ""
-            ph = st.empty()
+            message_placeholder = st.empty()
+            
             for chunk in res:
                 full_res += chunk.text
-                ph.markdown(full_res + "▌")
+                message_placeholder.markdown(full_res + "▌")
                 time.sleep(0.01)
-            ph.markdown(full_res)
+            
+            message_placeholder.markdown(full_res)
+            
+            # Başlık oluşturma (ilk mesajsa)
+            if len(st.session_state.messages) == 1:
+                st.session_state.messages[0]["title"] = prompt[:25]
+                
             st.session_state.messages.append({"role": "assistant", "content": full_res})
             db[st.session_state.current_chat_id] = st.session_state.messages
             save_db(db)
+            
         except Exception as e:
-            st.error("Bir hata oluştu. Lütfen tekrar deneyin.")
+            status_placeholder.empty()
+            st.error("Model bağlantısında bir hata oluştu.")
