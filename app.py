@@ -252,18 +252,34 @@ st.markdown("""
         border-radius: 6px !important;
     }
 
-    /* İkon buton içindeki p/span sarmalayıcıyı da sıfırla */
+    /* İkon buton içindeki TÜM sarmalayıcıları sıfırla (div, p, span) */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
-        > [data-testid="column"]:nth-child(2) .stButton > button > div,
+        > [data-testid="column"]:nth-child(2) .stButton > button *,
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
-        > [data-testid="column"]:nth-child(3) .stButton > button > div {
+        > [data-testid="column"]:nth-child(3) .stButton > button * {
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         padding: 0 !important;
         margin: 0 !important;
         line-height: 1 !important;
+        width: 100% !important;
+        height: 100% !important;
+        font-size: 0.85rem !important;
     }
+
+    /* ── KEYBOARD TOOLTIP'İ TAMAMEN GİZLE ── */
+    /* Streamlit'in buton üstündeki klavye kısayol tooltip'i */
+    [data-testid="stTooltipHoverTarget"]          { display: none !important; }
+    [data-testid="stTooltipContent"]              { display: none !important; }
+    [data-testid*="Tooltip"]                      { display: none !important; }
+    .stTooltipIcon                                { display: none !important; }
+    /* Streamlit'in emotion-cache tooltip sınıfları */
+    [class*="tooltip"]                            { display: none !important; }
+    [class*="Tooltip"]                            { display: none !important; }
+    /* "Press Enter" / klavye ipucu balonu */
+    kbd                                           { display: none !important; }
+    [role="tooltip"]                              { display: none !important; }
 
     /* ── DÜZENLEME MODU ── */
     [data-testid="stSidebar"] .stTextInput input {
@@ -326,65 +342,22 @@ st.markdown("""
         padding: 16px 2px 7px;
     }
     .sb-divider { border:none; border-top:1px solid #E5E7EB; margin:6px 0 12px; }
-
-    /* ══════════════════════════════════
-       SAĞ ALT KÖŞE — "Manage app" ÖRTÜCÜ
-    ══════════════════════════════════ */
-    .owner-badge {
-        position: fixed;
-        bottom: 0;
-        right: 0;
-        z-index: 999999;
-        background: #FFFFFF;
-        border-top: 1px solid #E2E8F0;
-        border-left: 1px solid #E2E8F0;
-        border-radius: 10px 0 0 0;
-        padding: 8px 16px 8px 12px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        pointer-events: none;
-        user-select: none;
-        min-width: 180px;
-    }
-    .owner-badge .ob-dot {
-        width: 7px; height: 7px;
-        border-radius: 50%;
-        background: #22C55E;
-        flex-shrink: 0;
-    }
-    .owner-badge .ob-name {
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: #0F172A;
-        font-family: 'DM Sans', sans-serif;
-    }
-    .owner-badge .ob-role {
-        font-size: 0.7rem;
-        color: #94A3B8;
-        font-family: 'DM Sans', sans-serif;
-        display: block;
-        line-height: 1.2;
-    }
 </style>
 
-<!-- Manage app'i JS ile yakala ve gizle + owner badge -->
+<!-- Manage app'i JS ile tamamen yok et -->
 <script>
 (function() {
     function killManageApp() {
-        // data-testid ile
-        var targets = [
+        var selectors = [
             '[data-testid="stStatusWidget"]',
             '[data-testid="stDeployButton"]',
-            '.viewerBadge_container__r5tak',
-            '.viewerBadge_link__qRIco',
             '[class*="viewerBadge"]',
             '[class*="StatusWidget"]',
             '[class*="stStatusWidget"]',
             '.st-emotion-cache-zq5wmm',
             '._container_51w34_1',
         ];
-        targets.forEach(function(sel) {
+        selectors.forEach(function(sel) {
             document.querySelectorAll(sel).forEach(function(el) {
                 el.style.setProperty('display','none','important');
                 el.style.setProperty('visibility','hidden','important');
@@ -392,11 +365,10 @@ st.markdown("""
                 el.style.setProperty('pointer-events','none','important');
             });
         });
-        // "Manage app" metnini içeren her elementi bul
         document.querySelectorAll('a, button, span, div').forEach(function(el) {
             if (el.children.length === 0 && el.textContent.trim() === 'Manage app') {
                 var p = el;
-                for (var i = 0; i < 6; i++) {
+                for (var i = 0; i < 8; i++) {
                     p.style.setProperty('display','none','important');
                     if (p.parentElement) p = p.parentElement; else break;
                 }
@@ -404,18 +376,9 @@ st.markdown("""
         });
     }
     killManageApp();
-    var obs = new MutationObserver(killManageApp);
-    obs.observe(document.body, { childList: true, subtree: true });
+    new MutationObserver(killManageApp).observe(document.body, { childList: true, subtree: true });
 })();
 </script>
-
-<div class="owner-badge">
-    <div class="ob-dot"></div>
-    <div>
-        <span class="ob-name">Merve [Soyadı]</span>
-        <span class="ob-role">Proje Sahibi · Siber Hukuk</span>
-    </div>
-</div>
 """, unsafe_allow_html=True)
 
 # ==========================================
