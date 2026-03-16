@@ -34,19 +34,22 @@ def save_db(data):
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 # ==========================================
-# 3. ÖZEL CSS (GÜNCELLENDİ)
+# 3. ÖZEL CSS (GÖRÜNMEZLİK TAKTİĞİ EKLENDİ)
 # ==========================================
 st.markdown("""
 <style>
     /* Toolbar gizle */
     [data-testid="stToolbar"] { display: none !important; }
 
-    /* Streamlit'in kendi sidebar butonlarını tamamen etkisizleştir */
+    /* Streamlit'in kendi butonlarını SİLME, JS'in tıklayabilmesi için GÖRÜNMEZ YAP */
     button[data-testid="stSidebarCollapseButton"],
-    [data-testid="collapsedControl"],
-    [data-testid="stSidebarCollapsedControl"] {
-        display: none !important;
-        visibility: hidden !important;
+    [data-testid="collapsedControl"] {
+        opacity: 0 !important;
+        position: absolute !important;
+        top: -9999px !important;
+        left: -9999px !important;
+        pointer-events: none !important;
+        z-index: -1 !important;
     }
 
     /* HEADER şeffaf */
@@ -96,9 +99,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 4. KALICI FLOATING MENU BUTONU (JAVASCRIPT FIX)
+# 4. KALICI FLOATING MENU BUTONU (KESİN ÇÖZÜM)
 # ==========================================
-# Bu kod butonu iframe dışına, ana sayfaya enjekte eder.
 components.html("""
 <script>
     const parentDoc = window.parent.document;
@@ -130,26 +132,19 @@ components.html("""
         btn.onmouseout = () => { btn.style.backgroundColor = '#3B82F6'; btn.style.transform = 'scale(1)'; };
 
         btn.onclick = () => {
-            // Streamlit'in kendi gizli butonunu bul ve tetikle
-            const selectors = [
-                '[data-testid="stSidebarCollapseButton"]',
-                'button[aria-label="Close sidebar"]',
-                'button[aria-label="Open sidebar"]',
-                '.st-emotion-cache-6q9sum button'
-            ];
-            
-            let clicked = false;
-            for (const s of selectors) {
-                const el = parentDoc.querySelector(s);
-                if (el) { el.click(); clicked = true; break; }
-            }
-            
-            // Eğer butonlar bulunamazsa fallback (yedek) yöntem
-            if (!clicked) {
-                const sidebar = parentDoc.querySelector('[data-testid="stSidebar"]');
-                if (sidebar) {
-                    const isVisible = sidebar.getAttribute('aria-expanded') === 'true';
-                    // Bu kısım Streamlit internal state'ine bağlıdır
+            const sidebar = parentDoc.querySelector('[data-testid="stSidebar"]');
+            const isExpanded = sidebar && sidebar.getAttribute('aria-expanded') === 'true';
+
+            if (isExpanded) {
+                // Sidebar açıksa kapatma butonunu bul ve tıkla
+                const closeBtn = parentDoc.querySelector('[data-testid="stSidebarCollapseButton"]');
+                if (closeBtn) closeBtn.click();
+            } else {
+                // Sidebar kapalıysa açma butonunu bul ve tıkla
+                const openContainer = parentDoc.querySelector('[data-testid="collapsedControl"]');
+                if (openContainer) {
+                    const openBtn = openContainer.querySelector('button') || openContainer;
+                    openBtn.click();
                 }
             }
         };
@@ -164,8 +159,7 @@ components.html("""
 try:
     API_KEY = st.secrets["GEMINI_API_KEY"]
     genai.configure(api_key=API_KEY)
-    # Gemini 3 Flash modelini burada güncelledik
-    model = genai.GenerativeModel('gemini-1.5-flash') 
+    model = genai.GenerativeModel('gemini-3-flash') 
 except:
     st.error("API Secret Hatası! Lütfen Streamlit ayarlarını kontrol edin.")
     st.stop()
@@ -254,12 +248,8 @@ if prompt := st.chat_input("Hukuki vakayı yazın..."):
         st.markdown(prompt)
 
     with st.chat_message("assistant", avatar="⚖️"):
-        status_placeholder = st.empty()
-        status_placeholder.markdown('<p style="color:#94A3B8; font-style:italic; font-size:0.85rem;">⚖️ Hukuki analiz yapılıyor...</p>', unsafe_allow_html=True)
-        
         try:
             res = st.session_state.chat_session.send_message(prompt, stream=True)
-            status_placeholder.empty()
             
             full_res = ""
             message_placeholder = st.empty()
@@ -267,11 +257,10 @@ if prompt := st.chat_input("Hukuki vakayı yazın..."):
             for chunk in res:
                 full_res += chunk.text
                 message_placeholder.markdown(full_res + "▌")
-                time.sleep(0.01)
+                time.sleep(0.01) # Soft yazma animasyonu
             
             message_placeholder.markdown(full_res)
             
-            # Başlık oluşturma (ilk mesajsa)
             if len(st.session_state.messages) == 1:
                 st.session_state.messages[0]["title"] = prompt[:25]
                 
@@ -280,5 +269,4 @@ if prompt := st.chat_input("Hukuki vakayı yazın..."):
             save_db(db)
             
         except Exception as e:
-            status_placeholder.empty()
             st.error("Model bağlantısında bir hata oluştu.")
