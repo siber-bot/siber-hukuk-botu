@@ -175,52 +175,54 @@ st.markdown("""
         color: #111827 !important;
     }
 
-    /* ── İkon kolonları: 34px sabit ── */
+    /* ── İkon kolonları: 36px sabit, flex ortala ── */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
         > [data-testid="column"]:nth-child(2),
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
         > [data-testid="column"]:nth-child(3) {
-        flex: 0 0 34px !important;
-        max-width: 34px !important;
-        min-width: 34px !important;
+        flex: 0 0 36px !important;
+        max-width: 36px !important;
+        min-width: 36px !important;
+        padding: 0 !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
     }
+
+    /* stButton sarmalayıcı */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
         > [data-testid="column"]:nth-child(2) [data-testid="stButton"],
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
         > [data-testid="column"]:nth-child(3) [data-testid="stButton"] {
+        width: 36px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        width: 34px !important;
     }
 
-    /* ── İkon butonları: 34×34, tam ortalı ── */
+    /* ── İkon butonları: grid ile kusursuz ortalama ── */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
         > [data-testid="column"]:nth-child(2) .stButton > button,
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
         > [data-testid="column"]:nth-child(3) .stButton > button {
         opacity: 0 !important;
         pointer-events: none !important;
-        background: #F1F5F9 !important;
+        background: #EAEFF6 !important;
         border: none !important;
         border-radius: 7px !important;
         padding: 0 !important;
-        margin: 0 auto !important;
-        font-size: 0.85rem !important;
-        color: #9CA3AF !important;
+        margin: 0 !important;
+        font-size: 0.9rem !important;
+        color: #6B7280 !important;
         box-shadow: none !important;
-        width: 34px !important;
-        height: 34px !important;
+        width: 30px !important;
+        height: 30px !important;
         min-height: 0 !important;
-        max-height: 34px !important;
+        max-height: 30px !important;
         min-width: 0 !important;
-        line-height: 34px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
+        /* GRID — en güvenilir ortalama yöntemi */
+        display: grid !important;
+        place-items: center !important;
         transition:
             opacity 0.15s ease,
             background 0.12s ease,
@@ -236,36 +238,36 @@ st.markdown("""
         pointer-events: auto !important;
     }
 
-    /* Kalem: hover'da mavi pill */
+    /* Kalem: hover mavi */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:hover
         > [data-testid="column"]:nth-child(2) .stButton > button:hover {
-        background: #E0EAFF !important;
-        color: #3B5BDB !important;
-        border-radius: 6px !important;
+        background: #DBEAFE !important;
+        color: #2563EB !important;
     }
 
-    /* Çöp: hover'da kırmızı pill */
+    /* Sil: hover kırmızı */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:hover
         > [data-testid="column"]:nth-child(3) .stButton > button:hover {
-        background: #FFE4E4 !important;
-        color: #C92A2A !important;
-        border-radius: 6px !important;
+        background: #FEE2E2 !important;
+        color: #DC2626 !important;
     }
 
-    /* İkon buton içindeki TÜM sarmalayıcıları sıfırla (div, p, span) */
+    /* ── İkon buton içi: div ve p sıfırla ── */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
-        > [data-testid="column"]:nth-child(2) .stButton > button *,
+        > [data-testid="column"]:nth-child(2) .stButton > button > div,
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
-        > [data-testid="column"]:nth-child(3) .stButton > button * {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        padding: 0 !important;
+        > [data-testid="column"]:nth-child(3) .stButton > button > div {
+        display: contents !important; /* div'i görünmez yap, içeriği direkt aktar */
+    }
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
+        > [data-testid="column"]:nth-child(2) .stButton > button p,
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
+        > [data-testid="column"]:nth-child(3) .stButton > button p {
         margin: 0 !important;
+        padding: 0 !important;
         line-height: 1 !important;
-        width: 100% !important;
-        height: 100% !important;
-        font-size: 0.85rem !important;
+        font-size: 0.9rem !important;
+        display: block !important;
     }
 
     /* ── KEYBOARD HINT GİZLE (sadece baloncuk, buton değil) ── */
@@ -450,7 +452,7 @@ with st.sidebar:
                     st.rerun()
         else:
             # ── Normal görünüm ───────────────────
-            c1, c2, c3 = st.columns([0.76, 0.12, 0.12], gap="small")
+            c1, c2, c3 = st.columns([0.70, 0.15, 0.15], gap="small")
             with c1:
                 display_t = t_db[cid][0].get("title", t_db[cid][0]["content"][:26] + "…")
                 is_active = (st.session_state.current_chat_id == cid)
