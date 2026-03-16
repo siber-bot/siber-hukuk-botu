@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import google.generativeai as genai
 import time
 import json
@@ -34,41 +33,72 @@ def save_db(data):
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 # ==========================================
-# 3. ÖZEL CSS (GÖRÜNMEZLİK TAKTİĞİ EKLENDİ)
+# 3. ÖZEL CSS (JAVASCRIPT OLMADAN KESİN ÇÖZÜM)
 # ==========================================
 st.markdown("""
 <style>
-    /* Toolbar gizle */
-    [data-testid="stToolbar"] { display: none !important; }
+    /* KARANLIK MODU İPTAL ET - ZORUNLU AYDINLIK TEMA */
+    .stApp, .main { background-color: #FFFFFF !important; }
+    [data-testid="stHeader"] { background: transparent !important; }
+    .stMarkdown p, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 { color: #0F172A !important; }
 
-    /* Streamlit'in kendi butonlarını SİLME, JS'in tıklayabilmesi için GÖRÜNMEZ YAP */
-    button[data-testid="stSidebarCollapseButton"],
-    [data-testid="collapsedControl"] {
-        opacity: 0 !important;
-        position: absolute !important;
-        top: -9999px !important;
-        left: -9999px !important;
-        pointer-events: none !important;
-        z-index: -1 !important;
-    }
-
-    /* HEADER şeffaf */
-    header[data-testid="stHeader"] {
-        background: transparent !important;
-    }
-
-    /* ANA KONTEYNER */
-    .block-container { 
-        padding-top: 3.5rem !important; 
-        max-width: 850px !important; 
-        margin: 0 auto !important; 
-    }
-
-    /* SİDEBAR STİL */
+    /* SİDEBAR STİLİ */
     [data-testid="stSidebar"] { 
         background-color: #F8FAFC !important; 
         border-right: 1px solid #E2E8F0 !important;
         z-index: 1000000 !important;
+    }
+
+    /* ARAÇ ÇUBUĞUNU GİZLE */
+    [data-testid="stToolbar"] { display: none !important; }
+
+    /* -------------------------------------------------------------
+       SİHİRLİ DOKUNUŞ: STREAMLIT'İN KENDİ BUTONLARINI ŞEKİLLENDİRME 
+       ------------------------------------------------------------- */
+       
+    /* MENÜ KAPALIYKEN ÇIKAN ORİJİNAL BUTON */
+    [data-testid="collapsedControl"] {
+        position: fixed !important;
+        top: 14px !important;
+        left: 14px !important;
+        width: 44px !important;
+        height: 44px !important;
+        background-color: #3B82F6 !important;
+        border-radius: 12px !important;
+        z-index: 999999 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: 0 4px 14px rgba(59,130,246,0.5) !important;
+        transition: all 0.2s ease !important;
+    }
+    [data-testid="collapsedControl"]:hover { background-color: #2563EB !important; transform: scale(1.08) !important; }
+    [data-testid="collapsedControl"] svg { fill: white !important; color: white !important; width: 22px !important; height: 22px !important; }
+
+    /* MENÜ AÇIKKEN ÇIKAN ORİJİNAL BUTON */
+    [data-testid="stSidebarCollapseButton"] {
+        position: fixed !important;
+        top: 14px !important;
+        left: 14px !important;
+        width: 44px !important;
+        height: 44px !important;
+        background-color: #3B82F6 !important;
+        border-radius: 12px !important;
+        z-index: 999999 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: 0 4px 14px rgba(59,130,246,0.5) !important;
+        transition: all 0.2s ease !important;
+    }
+    [data-testid="stSidebarCollapseButton"]:hover { background-color: #2563EB !important; transform: scale(1.08) !important; }
+    [data-testid="stSidebarCollapseButton"] svg { fill: white !important; color: white !important; width: 22px !important; height: 22px !important; }
+
+    /* ANA KONTEYNER */
+    .block-container { 
+        padding-top: 4.5rem !important; 
+        max-width: 850px !important; 
+        margin: 0 auto !important; 
     }
 
     /* BAŞLIK */
@@ -99,73 +129,19 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 4. KALICI FLOATING MENU BUTONU (KESİN ÇÖZÜM)
-# ==========================================
-components.html("""
-<script>
-    const parentDoc = window.parent.document;
-    
-    if (!parentDoc.getElementById('cyber-menu-btn')) {
-        const btn = parentDoc.createElement('button');
-        btn.id = 'cyber-menu-btn';
-        btn.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="white"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>';
-        
-        Object.assign(btn.style, {
-            position: 'fixed',
-            top: '14px',
-            left: '14px',
-            zIndex: '9999999',
-            width: '44px',
-            height: '44px',
-            backgroundColor: '#3B82F6',
-            border: 'none',
-            borderRadius: '12px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 14px rgba(59,130,246,0.5)',
-            transition: 'all 0.2s ease'
-        });
-
-        btn.onmouseover = () => { btn.style.backgroundColor = '#2563EB'; btn.style.transform = 'scale(1.08)'; };
-        btn.onmouseout = () => { btn.style.backgroundColor = '#3B82F6'; btn.style.transform = 'scale(1)'; };
-
-        btn.onclick = () => {
-            const sidebar = parentDoc.querySelector('[data-testid="stSidebar"]');
-            const isExpanded = sidebar && sidebar.getAttribute('aria-expanded') === 'true';
-
-            if (isExpanded) {
-                // Sidebar açıksa kapatma butonunu bul ve tıkla
-                const closeBtn = parentDoc.querySelector('[data-testid="stSidebarCollapseButton"]');
-                if (closeBtn) closeBtn.click();
-            } else {
-                // Sidebar kapalıysa açma butonunu bul ve tıkla
-                const openContainer = parentDoc.querySelector('[data-testid="collapsedControl"]');
-                if (openContainer) {
-                    const openBtn = openContainer.querySelector('button') || openContainer;
-                    openBtn.click();
-                }
-            }
-        };
-        parentDoc.body.appendChild(btn);
-    }
-</script>
-""", height=0)
-
-# ==========================================
-# 5. API VE MODEL
+# 4. API VE MODEL
 # ==========================================
 try:
     API_KEY = st.secrets["GEMINI_API_KEY"]
     genai.configure(api_key=API_KEY)
+    # Model güncellendi
     model = genai.GenerativeModel('gemini-3-flash') 
 except:
     st.error("API Secret Hatası! Lütfen Streamlit ayarlarını kontrol edin.")
     st.stop()
 
 # ==========================================
-# 6. DATA & SESSION STATE
+# 5. DATA & SESSION STATE
 # ==========================================
 db = load_db()
 
@@ -179,7 +155,7 @@ if "edit_id" not in st.session_state:
     st.session_state.edit_id = None
 
 # ==========================================
-# 7. SOL MENÜ (SİDEBAR) İÇERİĞİ
+# 6. SOL MENÜ (SİDEBAR) İÇERİĞİ
 # ==========================================
 with st.sidebar:
     st.markdown("<h3 style='color:#0F172A; margin-top:20px;'>⚖️ Siber Asistan</h3>", unsafe_allow_html=True)
@@ -228,7 +204,7 @@ with st.sidebar:
                     st.rerun()
 
 # ==========================================
-# 8. ANA EKRAN
+# 7. ANA EKRAN
 # ==========================================
 if not st.session_state.messages:
     st.markdown('<h1 class="portal-title">Siber Hukuk Portalı</h1>', unsafe_allow_html=True)
@@ -240,7 +216,7 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # ==========================================
-# 9. SOHBET & ANALİZ SÜRECİ
+# 8. SOHBET & ANALİZ SÜRECİ
 # ==========================================
 if prompt := st.chat_input("Hukuki vakayı yazın..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
@@ -257,7 +233,7 @@ if prompt := st.chat_input("Hukuki vakayı yazın..."):
             for chunk in res:
                 full_res += chunk.text
                 message_placeholder.markdown(full_res + "▌")
-                time.sleep(0.01) # Soft yazma animasyonu
+                time.sleep(0.01) # Soft yazma animasyonu (Analiz yazısı kaldırıldı)
             
             message_placeholder.markdown(full_res)
             
