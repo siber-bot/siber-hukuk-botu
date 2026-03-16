@@ -268,18 +268,12 @@ st.markdown("""
         font-size: 0.85rem !important;
     }
 
-    /* ── KEYBOARD TOOLTIP'İ TAMAMEN GİZLE ── */
-    /* Streamlit'in buton üstündeki klavye kısayol tooltip'i */
-    [data-testid="stTooltipHoverTarget"]          { display: none !important; }
-    [data-testid="stTooltipContent"]              { display: none !important; }
-    [data-testid*="Tooltip"]                      { display: none !important; }
-    .stTooltipIcon                                { display: none !important; }
-    /* Streamlit'in emotion-cache tooltip sınıfları */
-    [class*="tooltip"]                            { display: none !important; }
-    [class*="Tooltip"]                            { display: none !important; }
-    /* "Press Enter" / klavye ipucu balonu */
-    kbd                                           { display: none !important; }
-    [role="tooltip"]                              { display: none !important; }
+    /* ── KEYBOARD HINT GİZLE (sadece baloncuk, buton değil) ── */
+    /* Streamlit'in sağ üst köşedeki küçük klavye ipucu etiketi */
+    [data-testid="stTooltipContent"]               { display: none !important; }
+    [data-baseweb="tooltip"]                       { display: none !important; }
+    [role="tooltip"]                               { display: none !important; }
+    kbd                                            { display: none !important; }
 
     /* ── DÜZENLEME MODU ── */
     [data-testid="stSidebar"] .stTextInput input {
@@ -466,11 +460,11 @@ with st.sidebar:
                     st.session_state.messages = t_db[cid]
                     st.rerun()
             with c2:
-                if st.button("✦", key=f"e_{cid}", help="Yeniden Adlandır"):
+                if st.button("✦", key=f"e_{cid}"):
                     st.session_state.edit_id = cid
                     st.rerun()
             with c3:
-                if st.button("✕", key=f"d_{cid}", help="Sohbeti Sil"):
+                if st.button("✕", key=f"d_{cid}"):
                     del t_db[cid]
                     save_db(t_db)
                     if st.session_state.current_chat_id == cid:
