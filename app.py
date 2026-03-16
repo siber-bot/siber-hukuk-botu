@@ -112,29 +112,50 @@ st.markdown("""
         transform: none !important;
     }
 
-    /* ══════════════════════════════════
-       GEÇMİŞ SATIRLARI — hover reveal
-    ══════════════════════════════════ */
+    /* ══════════════════════════════════════════════════
+       GEÇMİŞ SATIRLARI — tam sıfırlanmış, modern pill
+    ══════════════════════════════════════════════════ */
+
+    /* Satır kapsayıcı — hafif hover zeminli */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {
         position: relative !important;
-        border-radius: 9px !important;
-        padding: 0 !important;
-        margin-bottom: 2px !important;
-        transition: background 0.12s ease !important;
+        border-radius: 8px !important;
+        padding: 0 2px !important;
+        margin-bottom: 1px !important;
+        gap: 2px !important;
+        align-items: center !important;
+        transition: background 0.15s ease !important;
     }
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:hover {
-        background: #EEF2F7 !important;
+        background: #EAEFF6 !important;
     }
 
-    /* İsim butonu */
+    /* Tüm sütunların padding'ini sıfırla */
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
+        > [data-testid="column"] {
+        padding: 0 !important;
+        min-width: 0 !important;
+    }
+
+    /* Streamlit'in stButton sarmalayıcısındaki boşlukları sıfırla */
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
+        > [data-testid="column"] > div,
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
+        > [data-testid="column"] [data-testid="stButton"] {
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* ── Ana isim butonu ── */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
         > [data-testid="column"]:nth-child(1) .stButton > button {
         text-align: left !important;
-        padding: 9px 6px 9px 11px !important;
-        color: #374151 !important;
-        font-size: 0.875rem !important;
+        padding: 8px 6px 8px 10px !important;
+        color: #4B5563 !important;
+        font-size: 0.855rem !important;
         font-weight: 400 !important;
-        border-radius: 9px !important;
+        border-radius: 8px !important;
         border: none !important;
         background: transparent !important;
         white-space: nowrap !important;
@@ -142,16 +163,29 @@ st.markdown("""
         text-overflow: ellipsis !important;
         box-shadow: none !important;
         width: 100% !important;
+        min-height: 0 !important;
+        height: 36px !important;
         line-height: 1.4 !important;
-        transition: color 0.12s !important;
+        transition: color 0.15s !important;
+        display: flex !important;
+        align-items: center !important;
     }
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:hover
         > [data-testid="column"]:nth-child(1) .stButton > button {
-        color: #0F172A !important;
-        background: transparent !important;
+        color: #111827 !important;
     }
 
-    /* İkon butonları — gizli */
+    /* ── İkon kolonları: sıkı genişlik, sıfır padding ── */
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
+        > [data-testid="column"]:nth-child(2),
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
+        > [data-testid="column"]:nth-child(3) {
+        flex: 0 0 28px !important;
+        max-width: 28px !important;
+        min-width: 28px !important;
+    }
+
+    /* ── İkon butonları: saf 28×28 nokta, sıfır chrome ── */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
         > [data-testid="column"]:nth-child(2) .stButton > button,
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
@@ -160,18 +194,27 @@ st.markdown("""
         pointer-events: none !important;
         background: transparent !important;
         border: none !important;
-        border-radius: 7px !important;
-        padding: 4px 6px !important;
-        font-size: 0.82rem !important;
-        color: #6B7280 !important;
+        border-radius: 6px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-size: 0.78rem !important;
+        color: #9CA3AF !important;
         box-shadow: none !important;
-        height: 30px !important;
-        min-height: unset !important;
-        line-height: 1 !important;
-        transition: opacity 0.12s ease, background 0.12s ease, color 0.12s ease !important;
+        width: 28px !important;
+        height: 28px !important;
+        min-height: 0 !important;
+        max-height: 28px !important;
+        line-height: 28px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition:
+            opacity 0.15s ease,
+            background 0.12s ease,
+            color 0.12s ease !important;
     }
 
-    /* İkon butonları — hover'da görünür */
+    /* İkon butonları görünür ol */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:hover
         > [data-testid="column"]:nth-child(2) .stButton > button,
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:hover
@@ -180,18 +223,33 @@ st.markdown("""
         pointer-events: auto !important;
     }
 
-    /* Kalem hover */
+    /* Kalem: hover'da mavi pill */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:hover
         > [data-testid="column"]:nth-child(2) .stButton > button:hover {
-        background: #DBEAFE !important;
-        color: #1D4ED8 !important;
+        background: #E0EAFF !important;
+        color: #3B5BDB !important;
+        border-radius: 6px !important;
     }
 
-    /* Çöp kutusu hover */
+    /* Çöp: hover'da kırmızı pill */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:hover
         > [data-testid="column"]:nth-child(3) .stButton > button:hover {
-        background: #FEE2E2 !important;
-        color: #DC2626 !important;
+        background: #FFE4E4 !important;
+        color: #C92A2A !important;
+        border-radius: 6px !important;
+    }
+
+    /* İkon buton içindeki p/span sarmalayıcıyı da sıfırla */
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
+        > [data-testid="column"]:nth-child(2) .stButton > button > div,
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
+        > [data-testid="column"]:nth-child(3) .stButton > button > div {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        line-height: 1 !important;
     }
 
     /* ── DÜZENLEME MODU ── */
@@ -382,21 +440,21 @@ with st.sidebar:
                     st.rerun()
         else:
             # ── Normal görünüm ───────────────────
-            c1, c2, c3 = st.columns([0.72, 0.14, 0.14], gap="small")
+            c1, c2, c3 = st.columns([0.76, 0.12, 0.12], gap="small")
             with c1:
-                display_t = t_db[cid][0].get("title", t_db[cid][0]["content"][:24] + "…")
+                display_t = t_db[cid][0].get("title", t_db[cid][0]["content"][:26] + "…")
                 is_active = (st.session_state.current_chat_id == cid)
-                label = f"{'· ' if is_active else ''}{display_t}"
+                label = f"{'▸ ' if is_active else ''}{display_t}"
                 if st.button(label, key=f"ch_{cid}", use_container_width=True):
                     st.session_state.current_chat_id = cid
                     st.session_state.messages = t_db[cid]
                     st.rerun()
             with c2:
-                if st.button("✎", key=f"e_{cid}", help="Yeniden Adlandır"):
+                if st.button("✦", key=f"e_{cid}", help="Yeniden Adlandır"):
                     st.session_state.edit_id = cid
                     st.rerun()
             with c3:
-                if st.button("🗑", key=f"d_{cid}", help="Sohbeti Sil"):
+                if st.button("✕", key=f"d_{cid}", help="Sohbeti Sil"):
                     del t_db[cid]
                     save_db(t_db)
                     if st.session_state.current_chat_id == cid:
