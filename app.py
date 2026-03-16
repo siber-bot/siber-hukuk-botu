@@ -12,7 +12,7 @@ st.set_page_config(
     page_title="Siber Hukuk Asistanı",
     page_icon="⚖️",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded" # Menü her zaman açık başlar
 )
 
 # ==========================================
@@ -33,70 +33,33 @@ def save_db(data):
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 # ==========================================
-# 3. ÖZEL CSS (JAVASCRIPT OLMADAN KESİN ÇÖZÜM)
+# 3. ÖZEL CSS (SABİT MENÜ VE AYDINLIK TEMA)
 # ==========================================
 st.markdown("""
 <style>
-    /* KARANLIK MODU İPTAL ET - ZORUNLU AYDINLIK TEMA */
+    /* ZORUNLU AYDINLIK TEMA */
     .stApp, .main { background-color: #FFFFFF !important; }
     [data-testid="stHeader"] { background: transparent !important; }
     .stMarkdown p, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 { color: #0F172A !important; }
 
-    /* SİDEBAR STİLİ */
+    /* SİDEBAR'I SABİTLEME VE KAPATMA BUTONUNU GİZLEME */
+    [data-testid="stSidebarCollapseButton"] { 
+        display: none !important; /* Kapatma okunu gizledik, böylece menü sabit kaldı */
+    }
+    
     [data-testid="stSidebar"] { 
         background-color: #F8FAFC !important; 
         border-right: 1px solid #E2E8F0 !important;
-        z-index: 1000000 !important;
+        min-width: 320px !important;
+        max-width: 320px !important;
     }
 
     /* ARAÇ ÇUBUĞUNU GİZLE */
     [data-testid="stToolbar"] { display: none !important; }
 
-    /* -------------------------------------------------------------
-       SİHİRLİ DOKUNUŞ: STREAMLIT'İN KENDİ BUTONLARINI ŞEKİLLENDİRME 
-       ------------------------------------------------------------- */
-       
-    /* MENÜ KAPALIYKEN ÇIKAN ORİJİNAL BUTON */
-    [data-testid="collapsedControl"] {
-        position: fixed !important;
-        top: 14px !important;
-        left: 14px !important;
-        width: 44px !important;
-        height: 44px !important;
-        background-color: #3B82F6 !important;
-        border-radius: 12px !important;
-        z-index: 999999 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        box-shadow: 0 4px 14px rgba(59,130,246,0.5) !important;
-        transition: all 0.2s ease !important;
-    }
-    [data-testid="collapsedControl"]:hover { background-color: #2563EB !important; transform: scale(1.08) !important; }
-    [data-testid="collapsedControl"] svg { fill: white !important; color: white !important; width: 22px !important; height: 22px !important; }
-
-    /* MENÜ AÇIKKEN ÇIKAN ORİJİNAL BUTON */
-    [data-testid="stSidebarCollapseButton"] {
-        position: fixed !important;
-        top: 14px !important;
-        left: 14px !important;
-        width: 44px !important;
-        height: 44px !important;
-        background-color: #3B82F6 !important;
-        border-radius: 12px !important;
-        z-index: 999999 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        box-shadow: 0 4px 14px rgba(59,130,246,0.5) !important;
-        transition: all 0.2s ease !important;
-    }
-    [data-testid="stSidebarCollapseButton"]:hover { background-color: #2563EB !important; transform: scale(1.08) !important; }
-    [data-testid="stSidebarCollapseButton"] svg { fill: white !important; color: white !important; width: 22px !important; height: 22px !important; }
-
-    /* ANA KONTEYNER */
+    /* ANA KONTEYNER (Menü sabit olduğu için padding'i normale çektik) */
     .block-container { 
-        padding-top: 4.5rem !important; 
+        padding-top: 3rem !important; 
         max-width: 850px !important; 
         margin: 0 auto !important; 
     }
@@ -107,7 +70,7 @@ st.markdown("""
         font-weight: 800;
         font-size: 2.2rem;
         color: #0F172A;
-        margin-top: 1rem;
+        margin-top: 0rem;
     }
 
     /* SOHBET LİSTESİ BUTONLARI */
@@ -134,7 +97,6 @@ st.markdown("""
 try:
     API_KEY = st.secrets["GEMINI_API_KEY"]
     genai.configure(api_key=API_KEY)
-    # Model güncellendi
     model = genai.GenerativeModel('gemini-3-flash') 
 except:
     st.error("API Secret Hatası! Lütfen Streamlit ayarlarını kontrol edin.")
@@ -155,10 +117,10 @@ if "edit_id" not in st.session_state:
     st.session_state.edit_id = None
 
 # ==========================================
-# 6. SOL MENÜ (SİDEBAR) İÇERİĞİ
+# 6. SOL MENÜ (SABİT SİDEBAR) İÇERİĞİ
 # ==========================================
 with st.sidebar:
-    st.markdown("<h3 style='color:#0F172A; margin-top:20px;'>⚖️ Siber Asistan</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#0F172A; margin-top:10px;'>⚖️ Siber Asistan</h3>", unsafe_allow_html=True)
     st.markdown("<p style='font-size:0.85rem; color:#3B82F6; font-style:italic; margin-bottom:20px;'>Dijital dünyada adaletin rehberi.</p>", unsafe_allow_html=True)
     
     st.markdown("<p style='font-size:0.7rem; color:#94A3B8; font-weight:700; margin-bottom:5px;'>PROJE SAHİBİ</p>", unsafe_allow_html=True)
@@ -233,10 +195,11 @@ if prompt := st.chat_input("Hukuki vakayı yazın..."):
             for chunk in res:
                 full_res += chunk.text
                 message_placeholder.markdown(full_res + "▌")
-                time.sleep(0.01) # Soft yazma animasyonu (Analiz yazısı kaldırıldı)
+                time.sleep(0.01) # Akıcı soft yazma animasyonu
             
             message_placeholder.markdown(full_res)
             
+            # İlk mesajsa otomatik başlık atama
             if len(st.session_state.messages) == 1:
                 st.session_state.messages[0]["title"] = prompt[:25]
                 
