@@ -12,7 +12,7 @@ st.set_page_config(
     page_title="Siber Hukuk Asistanı",
     page_icon="⚖️",
     layout="wide",
-    initial_sidebar_state="expanded" 
+    initial_sidebar_state="expanded" # Menü açık başlar
 )
 
 # ==========================================
@@ -33,62 +33,77 @@ def save_db(data):
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 # ==========================================
-# 3. ÖZEL CSS (SABİT GRİ MENÜ VE AYDINLIK TEMA)
+# 3. ÖZEL CSS (BUG FİX & KUSURSUZ TASARIM)
 # ==========================================
 st.markdown("""
 <style>
-    /* ZORUNLU AYDINLIK TEMA - ANA SAYFA BEYAZ */
+    /* 1. ANA UYGULAMA BEYAZ, HEADER GİZLİ */
     .stApp, .main { background-color: #FFFFFF !important; }
-    [data-testid="stHeader"] { background: transparent !important; }
-    .stMarkdown p, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 { color: #0F172A !important; }
+    header[data-testid="stHeader"] { display: none !important; }
+    [data-testid="stToolbar"] { display: none !important; }
 
-    /* SİDEBAR KONTROLLERİNİ GİZLE VE SABİTLE */
-    [data-testid="stSidebarCollapseButton"] { display: none !important; }
-    [data-testid="collapsedControl"] { display: none !important; }
-
-    /* SİDEBAR ARKA PLAN RENGİ (HAFİF GRİ) */
-    [data-testid="stSidebar"] { 
-        background-color: #F0F2F6 !important; 
+    /* 2. SİDEBAR KESİN SABİTLEME VE RENKLENDİRME (BUG BURADA ÇÖZÜLÜYOR) */
+    /* Streamlit'in menü kapsayıcısını gri yapıyoruz */
+    section[data-testid="stSidebar"] { 
+        background-color: #F1F5F9 !important; /* Çok şık, modern bir açık gri */
         border-right: 1px solid #E2E8F0 !important;
         min-width: 320px !important;
         max-width: 320px !important;
     }
+    
+    /* Streamlit'in içteki inatçı beyaz katmanını şeffaf yapıyoruz! */
+    section[data-testid="stSidebar"] > div:first-child {
+        background-color: transparent !important; 
+    }
 
-    /* ANA KONTEYNER */
+    /* 3. AÇ/KAPAT BUTONLARINI DOM'DAN SİL */
+    button[data-testid="stSidebarCollapseButton"],
+    [data-testid="collapsedControl"] { 
+        display: none !important; 
+        width: 0 !important;
+        height: 0 !important;
+        visibility: hidden !important;
+    }
+
+    /* 4. ANA İÇERİK HİZALAMASI */
     .block-container { 
-        padding-top: 3rem !important; 
+        padding-top: 2.5rem !important; 
         max-width: 850px !important; 
         margin: 0 auto !important; 
     }
 
-    /* BAŞLIK */
     .portal-title {
         text-align: center;
         font-weight: 800;
         font-size: 2.2rem;
         color: #0F172A;
-        margin-top: 0rem;
+        margin-top: 0;
     }
 
-    /* ARAÇ ÇUBUĞUNU GİZLE */
-    [data-testid="stToolbar"] { display: none !important; }
-
-    /* SOHBET LİSTESİ BUTONLARI (Gri üstünde beyaz kart görünümü) */
+    /* 5. GEÇMİŞ SOHBET BUTONLARI (Gri zemin üstünde beyaz, gölgeli kartlar) */
     div[data-testid="stVerticalBlock"] div.stButton > button {
         text-align: left !important;
         width: 100% !important;
-        border: none !important;
+        border: 1px solid #E2E8F0 !important;
         background: #FFFFFF !important; 
-        padding: 10px 12px !important;
+        padding: 10px 14px !important;
         border-radius: 8px !important;
-        color: #475569 !important;
-        transition: all 0.2s !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+        color: #334155 !important;
+        font-weight: 500 !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.03) !important;
     }
     div[data-testid="stVerticalBlock"] div.stButton > button:hover {
-        background-color: #E2E8F0 !important;
-        color: #0F172A !important;
+        border-color: #CBD5E1 !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
         transform: translateY(-1px);
+        color: #0F172A !important;
+    }
+    
+    /* Divider çizgisini biraz belirginleştir */
+    hr {
+        margin: 1.5rem 0 !important;
+        border-bottom: 1px solid #CBD5E1 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -119,40 +134,38 @@ if "edit_id" not in st.session_state:
     st.session_state.edit_id = None
 
 # ==========================================
-# 6. SOL MENÜ (SABİT SİDEBAR) İÇERİĞİ
+# 6. SOL MENÜ (KUSURSUZ SABİT SİDEBAR)
 # ==========================================
 with st.sidebar:
-    # 1. Proje Adı ve Motivasyon
-    st.markdown("<h3 style='color:#0F172A; margin-top:10px; margin-bottom:5px;'>⚖️ Siber Asistan</h3>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color:#0F172A; margin-top:0px; margin-bottom:5px; font-weight:800;'>⚖️ Siber Asistan</h2>", unsafe_allow_html=True)
     st.markdown("<p style='font-size:0.85rem; color:#3B82F6; font-style:italic; margin-bottom:25px;'>Dijital dünyada adaletin rehberi.</p>", unsafe_allow_html=True)
     
-    # 2. Proje Sahibi
-    st.markdown("<p style='font-size:0.7rem; color:#94A3B8; font-weight:700; margin-bottom:5px;'>PROJE SAHİBİ</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size:0.75rem; color:#64748B; font-weight:700; margin-bottom:5px; letter-spacing: 0.5px;'>PROJE SAHİBİ</p>", unsafe_allow_html=True)
     st.markdown("👤 **Merve [Soyadı]**")
     
-    # 3. Section Çizgisi
     st.divider()
     
-    # 4. Yeni Analiz ve Geçmiş Chatler
+    # Yeni Analiz Butonu
     if st.button("➕ Yeni Analiz Başlat", type="primary", use_container_width=True):
         st.session_state.current_chat_id = datetime.now().strftime("%Y%m%d_%H%M%S")
         st.session_state.messages = []
         st.session_state.chat_session = model.start_chat(history=[])
         st.rerun()
 
-    st.markdown("<p style='font-size:0.7rem; color:#94A3B8; font-weight:700; margin-top:20px; margin-bottom:10px;'>GEÇMİŞ ANALİZLER</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size:0.75rem; color:#64748B; font-weight:700; margin-top:25px; margin-bottom:15px; letter-spacing: 0.5px;'>GEÇMİŞ ANALİZLER</p>", unsafe_allow_html=True)
     
     t_db = db.copy()
     for cid in sorted(t_db.keys(), reverse=True):
         if st.session_state.edit_id == cid:
             new_val = st.text_input("Düzenle", value=t_db[cid][0].get("title", t_db[cid][0]["content"][:15]), key=f"r_{cid}", label_visibility="collapsed")
-            if st.button("💾", key=f"s_{cid}"):
+            if st.button("💾 Kaydet", key=f"s_{cid}", use_container_width=True):
                 t_db[cid][0]["title"] = new_val
                 save_db(t_db)
                 st.session_state.edit_id = None
                 st.rerun()
         else:
-            c1, c2, c3 = st.columns([0.70, 0.15, 0.15])
+            # Kolon genişlikleri düzenlendi (butonların taşmaması için)
+            c1, c2, c3 = st.columns([0.65, 0.15, 0.20])
             with c1:
                 display_t = t_db[cid][0].get("title", t_db[cid][0]["content"][:18] + "...")
                 if st.button(f"💬 {display_t}", key=f"ch_{cid}", use_container_width=True):
@@ -160,11 +173,11 @@ with st.sidebar:
                     st.session_state.messages = t_db[cid]
                     st.rerun()
             with c2:
-                if st.button("✏️", key=f"e_{cid}"):
+                if st.button("✏️", key=f"e_{cid}", help="Yeniden Adlandır"):
                     st.session_state.edit_id = cid
                     st.rerun()
             with c3:
-                if st.button("🗑️", key=f"d_{cid}"):
+                if st.button("🗑️", key=f"d_{cid}", help="Sil"):
                     del t_db[cid]
                     save_db(t_db)
                     if st.session_state.current_chat_id == cid: 
@@ -172,11 +185,11 @@ with st.sidebar:
                     st.rerun()
 
 # ==========================================
-# 7. ANA EKRAN
+# 7. ANA EKRAN & MESAJLAŞMA
 # ==========================================
 if not st.session_state.messages:
     st.markdown('<h1 class="portal-title">Siber Hukuk Portalı</h1>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align:center; color:#64748B;">Hukuki vakayı veya sormak istediğiniz dijital hakları aşağıya yazın.</p>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align:center; color:#64748B; font-size:1.1rem;">Hukuki vakayı veya sormak istediğiniz dijital hakları aşağıya yazın.</p>', unsafe_allow_html=True)
 
 for msg in st.session_state.messages:
     av = "👤" if msg["role"] == "user" else "⚖️"
@@ -184,7 +197,7 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # ==========================================
-# 8. SOHBET & ANALİZ SÜRECİ
+# 8. SOHBET GİRDİSİ VE ANALİZ
 # ==========================================
 if prompt := st.chat_input("Hukuki vakayı yazın..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
