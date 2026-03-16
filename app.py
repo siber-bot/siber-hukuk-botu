@@ -175,36 +175,49 @@ st.markdown("""
         color: #111827 !important;
     }
 
-    /* ── İkon kolonları: sıkı genişlik, sıfır padding ── */
+    /* ── İkon kolonları: 34px sabit ── */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
         > [data-testid="column"]:nth-child(2),
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
         > [data-testid="column"]:nth-child(3) {
-        flex: 0 0 28px !important;
-        max-width: 28px !important;
-        min-width: 28px !important;
+        flex: 0 0 34px !important;
+        max-width: 34px !important;
+        min-width: 34px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
+        > [data-testid="column"]:nth-child(2) [data-testid="stButton"],
+    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
+        > [data-testid="column"]:nth-child(3) [data-testid="stButton"] {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 34px !important;
     }
 
-    /* ── İkon butonları: saf 28×28 nokta, sıfır chrome ── */
+    /* ── İkon butonları: 34×34, tam ortalı ── */
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
         > [data-testid="column"]:nth-child(2) .stButton > button,
     [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]
         > [data-testid="column"]:nth-child(3) .stButton > button {
         opacity: 0 !important;
         pointer-events: none !important;
-        background: transparent !important;
+        background: #F1F5F9 !important;
         border: none !important;
-        border-radius: 6px !important;
+        border-radius: 7px !important;
         padding: 0 !important;
-        margin: 0 !important;
-        font-size: 0.78rem !important;
+        margin: 0 auto !important;
+        font-size: 0.85rem !important;
         color: #9CA3AF !important;
         box-shadow: none !important;
-        width: 28px !important;
-        height: 28px !important;
+        width: 34px !important;
+        height: 34px !important;
         min-height: 0 !important;
-        max-height: 28px !important;
-        line-height: 28px !important;
+        max-height: 34px !important;
+        min-width: 0 !important;
+        line-height: 34px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -355,7 +368,47 @@ st.markdown("""
     }
 </style>
 
-<!-- Sağ alt köşe — "Manage app" üzerini tam örter -->
+<!-- Manage app'i JS ile yakala ve gizle + owner badge -->
+<script>
+(function() {
+    function killManageApp() {
+        // data-testid ile
+        var targets = [
+            '[data-testid="stStatusWidget"]',
+            '[data-testid="stDeployButton"]',
+            '.viewerBadge_container__r5tak',
+            '.viewerBadge_link__qRIco',
+            '[class*="viewerBadge"]',
+            '[class*="StatusWidget"]',
+            '[class*="stStatusWidget"]',
+            '.st-emotion-cache-zq5wmm',
+            '._container_51w34_1',
+        ];
+        targets.forEach(function(sel) {
+            document.querySelectorAll(sel).forEach(function(el) {
+                el.style.setProperty('display','none','important');
+                el.style.setProperty('visibility','hidden','important');
+                el.style.setProperty('opacity','0','important');
+                el.style.setProperty('pointer-events','none','important');
+            });
+        });
+        // "Manage app" metnini içeren her elementi bul
+        document.querySelectorAll('a, button, span, div').forEach(function(el) {
+            if (el.children.length === 0 && el.textContent.trim() === 'Manage app') {
+                var p = el;
+                for (var i = 0; i < 6; i++) {
+                    p.style.setProperty('display','none','important');
+                    if (p.parentElement) p = p.parentElement; else break;
+                }
+            }
+        });
+    }
+    killManageApp();
+    var obs = new MutationObserver(killManageApp);
+    obs.observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+
 <div class="owner-badge">
     <div class="ob-dot"></div>
     <div>
