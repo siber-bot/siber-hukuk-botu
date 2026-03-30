@@ -49,6 +49,28 @@ st.markdown("""
 
     .stApp { background-color: #F8FAFC !important; }
 
+    /* ── FIX 1: Sidebar toggle butonunun "keyboard_do.." tooltip'ini gizle ── */
+    button[data-testid="baseButton-headerNoPadding"],
+    [data-testid="collapsedControl"],
+    button[title*="keyboard"],
+    button[aria-label*="keyboard"],
+    section[data-testid="stSidebar"] ~ div > button,
+    div[data-testid="stSidebarCollapsedControl"] {
+        display: none !important;
+    }
+    /* Streamlit sidebar açma/kapama ok butonu tooltip'ini gizle */
+    button[kind="header"] { display: none !important; }
+    [data-testid="stSidebar"] > div:first-child > div > button {
+        pointer-events: none !important;
+    }
+    /* "keyboard_double_arrow_right" metnini içeren her elementi gizle */
+    button[title] { }
+    .st-emotion-cache-dvne4q,
+    .st-emotion-cache-1gulkj5,
+    [class*="collapsedControl"] {
+        display: none !important;
+    }
+
     /* ── SIDEBAR ── */
     section[data-testid="stSidebar"] {
         background-color: #FAFAFA !important;
@@ -66,14 +88,14 @@ st.markdown("""
         color: #94A3B8 !important;
     }
 
-    /* ── FIX 1: Sadece secondary/default butonları sıfırla, primary HARIÇ ── */
+    /* Sidebar secondary butonları sıfırla — primary HARIÇ */
     section[data-testid="stSidebar"] .stButton > button:not([kind="primary"]) {
         border: none !important;
         background: transparent !important;
         box-shadow: none !important;
     }
 
-    /* Yeni Analiz butonu — PRIMARY, güçlü tanım, sıfırlamadan muaf */
+    /* Yeni Analiz butonu — PRIMARY */
     section[data-testid="stSidebar"] .stButton > button[kind="primary"],
     section[data-testid="stSidebar"] button[kind="primary"] {
         background-color: #534AB7 !important;
@@ -198,19 +220,24 @@ st.markdown("""
     .typing-dot:nth-child(2) { animation-delay: 0.2s; }
     .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
-    /* Aksiyon butonları */
+    /* ── FIX 3: Modern aksiyon butonları ── */
+    .action-row { margin-top: 6px; }
     .action-row .stButton > button {
-        background: transparent !important;
+        background: #F8FAFC !important;
         border: 0.5px solid #E2E8F0 !important;
-        border-radius: 6px !important;
+        border-radius: 20px !important;
         font-size: 0.72rem !important;
         color: #94A3B8 !important;
-        padding: 2px 8px !important;
-        height: 24px !important;
-        min-height: 24px !important;
+        padding: 3px 10px !important;
+        height: 26px !important;
+        min-height: 26px !important;
+        line-height: 1 !important;
+        font-weight: 500 !important;
+        white-space: nowrap !important;
+        transition: all 0.12s !important;
     }
     .action-row .stButton > button:hover {
-        background: #F8FAFC !important;
+        background: #EEEDFE !important;
         color: #534AB7 !important;
         border-color: #AFA9EC !important;
     }
@@ -294,7 +321,7 @@ st.markdown("""
         background: #FFFFFF;
     }
 
-    /* ── Sidebar etiketler ── */
+    /* ── Sidebar section labels ── */
     .sb-section-label {
         font-size: 0.59rem;
         font-weight: 700;
@@ -341,7 +368,27 @@ st.markdown("""
         border-top: 0.5px solid #F1F5F9;
         margin-top: 6px;
     }
+
+    /* ── Scroll anchor ── */
+    #scroll-bottom { height: 1px; }
 </style>
+""", unsafe_allow_html=True)
+
+# ── FIX 1: keyboard_do tooltip'i JS ile de gizle ──
+st.markdown("""
+<script>
+(function hideSidebarToggleTooltip() {
+    const observer = new MutationObserver(() => {
+        document.querySelectorAll('button').forEach(btn => {
+            const label = btn.getAttribute('aria-label') || btn.title || '';
+            if (label.toLowerCase().includes('keyboard') || label.toLowerCase().includes('sidebar')) {
+                btn.style.display = 'none';
+            }
+        });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+})();
+</script>
 """, unsafe_allow_html=True)
 
 # ==========================================
@@ -374,6 +421,9 @@ if "liked_msgs" not in st.session_state:
     st.session_state.liked_msgs = []
 if "queued_prompt" not in st.session_state:
     st.session_state.queued_prompt = ""
+# FIX 2: scroll flag
+if "scroll_to_bottom" not in st.session_state:
+    st.session_state.scroll_to_bottom = False
 
 # ==========================================
 # 6. YARDIMCI FONKSİYONLAR
@@ -392,6 +442,16 @@ def group_chats_by_date(chat_dict):
         except:
             groups["Eskiler"].append(cid)
     return groups
+
+
+def scroll_to_bottom():
+    """Sayfayı en alta kaydır."""
+    st.markdown("""
+        <script>
+            window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+            setTimeout(() => window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'}), 300);
+        </script>
+    """, unsafe_allow_html=True)
 
 
 def run_ai(prompt: str):
@@ -428,6 +488,8 @@ def run_ai(prompt: str):
             fresh_db = load_db()
             fresh_db[st.session_state.current_chat_id] = st.session_state.messages
             save_db(fresh_db)
+            # FIX 2: scroll flag'i set et
+            st.session_state.scroll_to_bottom = True
 
         except Exception:
             placeholder.markdown("")
@@ -438,7 +500,7 @@ def run_ai(prompt: str):
 # ==========================================
 with st.sidebar:
 
-    # ── FIX 2: Proje sahibi kartı en üstte ──
+    # Proje sahibi kartı — en üstte
     st.markdown("""
         <div class='owner-card'>
             <div class='owner-avatar'>MH</div>
@@ -455,6 +517,7 @@ with st.sidebar:
         st.session_state.messages = []
         st.session_state.chat_session = model.start_chat(history=[])
         st.session_state.queued_prompt = ""
+        st.session_state.scroll_to_bottom = False
         st.rerun()
 
     st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
@@ -509,6 +572,7 @@ with st.sidebar:
                         st.session_state.current_chat_id = cid
                         st.session_state.messages = t_db[cid]
                         st.session_state.queued_prompt = ""
+                        st.session_state.scroll_to_bottom = False
                         st.rerun()
                     st.markdown("</div>", unsafe_allow_html=True)
                 with edit_c:
@@ -560,14 +624,15 @@ if chat_active:
 
             if msg["role"] == "assistant":
                 st.markdown("<div style='height:3px'></div>", unsafe_allow_html=True)
+                # FIX 3: Modern pill-shaped action buttons
                 st.markdown("<div class='action-row'>", unsafe_allow_html=True)
-                ac1, ac2, ac3, ac4, _gap = st.columns([0.13, 0.08, 0.08, 0.13, 0.58])
+                ac1, ac2, ac3, ac4, _gap = st.columns([0.15, 0.09, 0.09, 0.13, 0.54])
                 with ac1:
                     if st.button("📋 Kopyala", key=f"copy_{i}"):
                         st.toast("Panoya kopyalandı ✓", icon="✅")
                 with ac2:
                     liked = i in st.session_state.liked_msgs
-                    lbl = "👍✓" if liked else "👍"
+                    lbl = "👍 ✓" if liked else "👍"
                     if st.button(lbl, key=f"like_{i}"):
                         if i not in st.session_state.liked_msgs:
                             st.session_state.liked_msgs.append(i)
@@ -579,6 +644,14 @@ if chat_active:
                     if st.button("↺ Yenile", key=f"regen_{i}"):
                         st.toast("Yanıt yenileniyor…", icon="↺")
                 st.markdown("</div>", unsafe_allow_html=True)
+
+    # Scroll anchor
+    st.markdown("<div id='scroll-bottom'></div>", unsafe_allow_html=True)
+
+    # FIX 2: Scroll to bottom after new message
+    if st.session_state.scroll_to_bottom:
+        scroll_to_bottom()
+        st.session_state.scroll_to_bottom = False
 
 else:
     # ── PORTAL / KARŞILAMA EKRANI ──
