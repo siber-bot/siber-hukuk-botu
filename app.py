@@ -483,10 +483,13 @@ def run_ai(prompt: str):
             fresh_db[st.session_state.current_chat_id] = st.session_state.messages
             save_db(fresh_db)
             st.session_state.scroll_to_bottom = True
+            return True
 
-        except Exception:
+        except Exception as e:
             placeholder.markdown("")
-            st.error("Bir hata oluştu. Lütfen API anahtarınızı kontrol edin.")
+            st.error(f"⚠️ API Hatası Detayı: {e}")
+            st.session_state.messages.pop()
+            return False
 
 # ==========================================
 # 7. SOL MENÜ (SIDEBAR)
@@ -706,12 +709,14 @@ else:
 if st.session_state.queued_prompt:
     q = st.session_state.queued_prompt
     st.session_state.queued_prompt = ""
-    run_ai(q)
-    st.rerun()
+    is_success = run_ai(q)
+    if is_success:
+        st.rerun()
 
 if prompt := st.chat_input("Hukuki vakayı buraya yazın..."):
-    run_ai(prompt)
-    st.rerun()
+    is_success = run_ai(prompt)
+    if is_success:
+        st.rerun()
 
 st.markdown("""
     <div class='disclaimer'>
