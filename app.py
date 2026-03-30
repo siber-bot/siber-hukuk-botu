@@ -49,7 +49,7 @@ st.markdown("""
 
     .stApp { background-color: #F8FAFC !important; }
 
-    /* ── FIX 1: Sidebar toggle butonunun "keyboard_do.." tooltip'ini gizle ── */
+    /* ── FIX 1: Sidebar toggle butonunun tooltip'ini gizle ── */
     button[data-testid="baseButton-headerNoPadding"],
     [data-testid="collapsedControl"],
     button[title*="keyboard"],
@@ -58,13 +58,10 @@ st.markdown("""
     div[data-testid="stSidebarCollapsedControl"] {
         display: none !important;
     }
-    /* Streamlit sidebar açma/kapama ok butonu tooltip'ini gizle */
     button[kind="header"] { display: none !important; }
     [data-testid="stSidebar"] > div:first-child > div > button {
         pointer-events: none !important;
     }
-    /* "keyboard_double_arrow_right" metnini içeren her elementi gizle */
-    button[title] { }
     .st-emotion-cache-dvne4q,
     .st-emotion-cache-1gulkj5,
     [class*="collapsedControl"] {
@@ -88,14 +85,12 @@ st.markdown("""
         color: #94A3B8 !important;
     }
 
-    /* Sidebar secondary butonları sıfırla — primary HARIÇ */
     section[data-testid="stSidebar"] .stButton > button:not([kind="primary"]) {
         border: none !important;
         background: transparent !important;
         box-shadow: none !important;
     }
 
-    /* Yeni Analiz butonu — PRIMARY */
     section[data-testid="stSidebar"] .stButton > button[kind="primary"],
     section[data-testid="stSidebar"] button[kind="primary"] {
         background-color: #534AB7 !important;
@@ -116,15 +111,16 @@ st.markdown("""
         color: #FFFFFF !important;
     }
 
-    /* History item butonları */
+    /* ── MİNİMALİST GEÇMİŞ İTEMLERİ ── */
     section[data-testid="stSidebar"] .history-btn > button {
         text-align: left !important;
         font-size: 0.8rem !important;
         color: #4B5563 !important;
-        border-radius: 8px !important;
-        padding: 7px 10px !important;
+        border-radius: 6px !important;
+        padding: 6px 10px !important;
         width: 100% !important;
         transition: background 0.12s !important;
+        border: 1px solid transparent !important;
     }
     section[data-testid="stSidebar"] .history-btn > button:hover {
         background: #F1F5F9 !important;
@@ -134,24 +130,39 @@ st.markdown("""
         background: #EEEDFE !important;
         color: #534AB7 !important;
         font-weight: 600 !important;
-        border-left: 2px solid #534AB7 !important;
-        border-radius: 0 8px 8px 0 !important;
-        padding-left: 12px !important;
+        border: 1px solid #C4C0F0 !important;
+        border-left: 3px solid #534AB7 !important;
+        border-radius: 6px !important;
+        padding-left: 10px !important;
     }
 
-    /* Icon butonlar */
+    /* MİNİMAL İKON BUTONLARI */
     section[data-testid="stSidebar"] .icon-btn > button {
-        width: 24px !important;
-        height: 24px !important;
-        min-height: 24px !important;
+        width: 26px !important;
+        height: 26px !important;
+        min-height: 26px !important;
         padding: 0 !important;
-        font-size: 0.65rem !important;
-        color: #CBD5E1 !important;
-        border-radius: 5px !important;
+        font-size: 0.8rem !important;
+        color: #94A3B8 !important;
+        background: transparent !important;
+        border-radius: 6px !important;
+        transition: all 0.2s ease !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
     section[data-testid="stSidebar"] .icon-btn > button:hover {
-        background: #F1F5F9 !important;
+        background: #EEEDFE !important;
         color: #534AB7 !important;
+    }
+    section[data-testid="stSidebar"] .icon-btn.delete-btn > button:hover {
+        background: #FEE2E2 !important;
+        color: #EF4444 !important;
+    }
+    
+    /* Yan menü ikon sütunları boşluğunu daralt */
+    [data-testid="stSidebar"] [data-testid="column"] {
+        padding: 0 2px !important;
     }
 
     /* ── MESAJ BALONLARI ── */
@@ -185,7 +196,6 @@ st.markdown("""
         color: #1E293B !important;
     }
 
-    /* Chat input */
     [data-testid="stChatInput"] button {
         background-color: #534AB7 !important;
         color: white !important;
@@ -204,7 +214,6 @@ st.markdown("""
         padding-bottom: 0 !important;
     }
 
-    /* Yazıyor animasyonu */
     @keyframes typing-bounce {
         0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
         40%            { opacity: 1;    transform: translateY(-5px); }
@@ -220,7 +229,6 @@ st.markdown("""
     .typing-dot:nth-child(2) { animation-delay: 0.2s; }
     .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
-    /* ── FIX 3: Modern aksiyon butonları ── */
     .action-row { margin-top: 6px; }
     .action-row .stButton > button {
         background: #F8FAFC !important;
@@ -242,7 +250,6 @@ st.markdown("""
         border-color: #AFA9EC !important;
     }
 
-    /* ── Portal başlığı ── */
     .portal-title {
         text-align: center;
         font-weight: 700;
@@ -252,7 +259,6 @@ st.markdown("""
         margin-bottom: 0.3rem;
     }
 
-    /* ── Hoşgeldin kartları ── */
     .welcome-card {
         background: #FFFFFF;
         border: 0.5px solid #E2E8F0;
@@ -269,7 +275,6 @@ st.markdown("""
     .welcome-card-title { font-size: 0.85rem; font-weight: 600; color: #1E293B; }
     .welcome-card-desc  { font-size: 0.73rem; color: #64748B; margin-top: 3px; line-height: 1.4; }
 
-    /* Kart butonlarını gizle */
     .card-trigger .stButton > button {
         margin-top: -2px !important;
         opacity: 0 !important;
@@ -281,7 +286,6 @@ st.markdown("""
         width: 100% !important;
     }
 
-    /* ── Chip butonları ── */
     .chip-wrap .stButton > button {
         background: #F1F0FD !important;
         color: #534AB7 !important;
@@ -298,7 +302,6 @@ st.markdown("""
         border-color: #7F77DD !important;
     }
 
-    /* ── Topbar ── */
     .topbar {
         display: flex;
         align-items: center;
@@ -321,7 +324,6 @@ st.markdown("""
         background: #FFFFFF;
     }
 
-    /* ── Sidebar section labels ── */
     .sb-section-label {
         font-size: 0.59rem;
         font-weight: 700;
@@ -331,7 +333,6 @@ st.markdown("""
         padding: 12px 2px 4px;
     }
 
-    /* ── Proje sahibi kartı ── */
     .owner-card {
         margin: 8px 0 14px 0;
         padding: 10px 12px;
@@ -359,7 +360,6 @@ st.markdown("""
     .owner-name { font-size: 0.81rem; font-weight: 600; color: #2D2A6E; line-height: 1.3; }
     .owner-sub  { font-size: 0.64rem; color: #9491C8; margin-top: 1px; line-height: 1.4; }
 
-    /* ── Disclaimer ── */
     .disclaimer {
         text-align: center;
         font-size: 0.7rem;
@@ -369,12 +369,10 @@ st.markdown("""
         margin-top: 6px;
     }
 
-    /* ── Scroll anchor ── */
     #scroll-bottom { height: 1px; }
 </style>
 """, unsafe_allow_html=True)
 
-# ── FIX 1: keyboard_do tooltip'i JS ile de gizle ──
 st.markdown("""
 <script>
 (function hideSidebarToggleTooltip() {
@@ -392,7 +390,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 4. API VE MODEL  ← DOKUNULMUYOR
+# 4. API VE MODEL  ← KORUNAN BÖLÜM
 # ==========================================
 SISTEM_PROMPTU = "Sen uzman bir Siber Hukuk Asistanısın. Yanıtlarını resmi, madde işaretli ve Türkiye yasalarına dayandırarak ver."
 
@@ -421,7 +419,6 @@ if "liked_msgs" not in st.session_state:
     st.session_state.liked_msgs = []
 if "queued_prompt" not in st.session_state:
     st.session_state.queued_prompt = ""
-# FIX 2: scroll flag
 if "scroll_to_bottom" not in st.session_state:
     st.session_state.scroll_to_bottom = False
 
@@ -443,16 +440,13 @@ def group_chats_by_date(chat_dict):
             groups["Eskiler"].append(cid)
     return groups
 
-
 def scroll_to_bottom():
-    """Sayfayı en alta kaydır."""
     st.markdown("""
         <script>
             window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
             setTimeout(() => window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'}), 300);
         </script>
     """, unsafe_allow_html=True)
-
 
 def run_ai(prompt: str):
     st.session_state.messages.append({"role": "user", "content": prompt})
@@ -488,7 +482,6 @@ def run_ai(prompt: str):
             fresh_db = load_db()
             fresh_db[st.session_state.current_chat_id] = st.session_state.messages
             save_db(fresh_db)
-            # FIX 2: scroll flag'i set et
             st.session_state.scroll_to_bottom = True
 
         except Exception:
@@ -499,8 +492,6 @@ def run_ai(prompt: str):
 # 7. SOL MENÜ (SIDEBAR)
 # ==========================================
 with st.sidebar:
-
-    # Proje sahibi kartı — en üstte
     st.markdown("""
         <div class='owner-card'>
             <div class='owner-avatar'>MH</div>
@@ -526,7 +517,6 @@ with st.sidebar:
         label_visibility="collapsed", key="search_input"
     )
 
-    # Geçmiş konuşmalar
     t_db = load_db()
     if search_query:
         t_db = {
@@ -565,12 +555,21 @@ with st.sidebar:
                 title = (t_db[cid][0].get("title") or t_db[cid][0]["content"][:22]) if t_db[cid] else "Analiz"
                 active_cls = "history-btn-active" if is_active else "history-btn"
 
-                row_c, edit_c, del_c = st.columns([0.76, 0.12, 0.12])
+                # Sütun oranları daha minimalist ikonlar için güncellendi
+                row_c, edit_c, del_c = st.columns([0.74, 0.13, 0.13], gap="small")
                 with row_c:
                     st.markdown(f"<div class='{active_cls}'>", unsafe_allow_html=True)
                     if st.button(title, key=f"ch_{cid}", use_container_width=True):
                         st.session_state.current_chat_id = cid
                         st.session_state.messages = t_db[cid]
+                        
+                        # YAPAY ZEKA HAFIZA ONARIMI: Tıklanan sohbetin geçmişini modele yükler
+                        history_for_ai = []
+                        for m in t_db[cid]:
+                            r = "user" if m["role"] == "user" else "model"
+                            history_for_ai.append({"role": r, "parts": [m["content"]]})
+                        st.session_state.chat_session = model.start_chat(history=history_for_ai)
+                        
                         st.session_state.queued_prompt = ""
                         st.session_state.scroll_to_bottom = False
                         st.rerun()
@@ -582,13 +581,14 @@ with st.sidebar:
                         st.rerun()
                     st.markdown("</div>", unsafe_allow_html=True)
                 with del_c:
-                    st.markdown("<div class='icon-btn'>", unsafe_allow_html=True)
+                    st.markdown("<div class='icon-btn delete-btn'>", unsafe_allow_html=True)
                     if st.button("🗑", key=f"d_{cid}", help="Sil"):
                         del t_db[cid]
                         save_db(t_db)
                         if cid == st.session_state.current_chat_id:
                             st.session_state.messages = []
                             st.session_state.current_chat_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+                            st.session_state.chat_session = model.start_chat(history=[])
                         st.rerun()
                     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -624,7 +624,6 @@ if chat_active:
 
             if msg["role"] == "assistant":
                 st.markdown("<div style='height:3px'></div>", unsafe_allow_html=True)
-                # FIX 3: Modern pill-shaped action buttons
                 st.markdown("<div class='action-row'>", unsafe_allow_html=True)
                 ac1, ac2, ac3, ac4, _gap = st.columns([0.15, 0.09, 0.09, 0.13, 0.54])
                 with ac1:
@@ -645,16 +644,13 @@ if chat_active:
                         st.toast("Yanıt yenileniyor…", icon="↺")
                 st.markdown("</div>", unsafe_allow_html=True)
 
-    # Scroll anchor
     st.markdown("<div id='scroll-bottom'></div>", unsafe_allow_html=True)
 
-    # FIX 2: Scroll to bottom after new message
     if st.session_state.scroll_to_bottom:
         scroll_to_bottom()
         st.session_state.scroll_to_bottom = False
 
 else:
-    # ── PORTAL / KARŞILAMA EKRANI ──
     st.markdown('<h1 class="portal-title">⚖️ Siber Hukuk Portalı</h1>', unsafe_allow_html=True)
     st.markdown(
         '<p style="text-align:center;color:#64748B;margin-bottom:1.5rem;font-size:0.9rem;">'
@@ -717,7 +713,6 @@ if prompt := st.chat_input("Hukuki vakayı buraya yazın..."):
     run_ai(prompt)
     st.rerun()
 
-# Disclaimer
 st.markdown("""
     <div class='disclaimer'>
         ⚠️ Bu platform hukuki tavsiye niteliği taşımamaktadır.
