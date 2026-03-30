@@ -66,23 +66,32 @@ st.markdown("""
         color: #94A3B8 !important;
     }
 
-    /* Yeni Analiz butonu */
-    section[data-testid="stSidebar"] button[kind="primary"] {
-        background-color: #534AB7 !important;
-        border-color: #534AB7 !important;
-        border-radius: 8px !important;
-        font-weight: 500 !important;
-        font-size: 0.85rem !important;
-    }
-    section[data-testid="stSidebar"] button[kind="primary"]:hover {
-        background-color: #4339A8 !important;
-    }
-
-    /* Sidebar tüm secondary butonları sıfırla */
-    section[data-testid="stSidebar"] .stButton > button {
+    /* ── FIX 1: Sadece secondary/default butonları sıfırla, primary HARIÇ ── */
+    section[data-testid="stSidebar"] .stButton > button:not([kind="primary"]) {
         border: none !important;
         background: transparent !important;
         box-shadow: none !important;
+    }
+
+    /* Yeni Analiz butonu — PRIMARY, güçlü tanım, sıfırlamadan muaf */
+    section[data-testid="stSidebar"] .stButton > button[kind="primary"],
+    section[data-testid="stSidebar"] button[kind="primary"] {
+        background-color: #534AB7 !important;
+        background: #534AB7 !important;
+        border: 1px solid #534AB7 !important;
+        border-radius: 8px !important;
+        font-weight: 500 !important;
+        font-size: 0.85rem !important;
+        color: #FFFFFF !important;
+        opacity: 1 !important;
+        box-shadow: 0 1px 4px rgba(83,74,183,0.25) !important;
+    }
+    section[data-testid="stSidebar"] .stButton > button[kind="primary"]:hover,
+    section[data-testid="stSidebar"] button[kind="primary"]:hover {
+        background-color: #4339A8 !important;
+        background: #4339A8 !important;
+        border-color: #4339A8 !important;
+        color: #FFFFFF !important;
     }
 
     /* History item butonları */
@@ -233,7 +242,7 @@ st.markdown("""
     .welcome-card-title { font-size: 0.85rem; font-weight: 600; color: #1E293B; }
     .welcome-card-desc  { font-size: 0.73rem; color: #64748B; margin-top: 3px; line-height: 1.4; }
 
-    /* Kart butonlarını gizle – kartın tam altına konur, gizli tıklama alanı */
+    /* Kart butonlarını gizle */
     .card-trigger .stButton > button {
         margin-top: -2px !important;
         opacity: 0 !important;
@@ -286,7 +295,6 @@ st.markdown("""
     }
 
     /* ── Sidebar etiketler ── */
-    .sb-logo { padding: 8px 4px 0; display: flex; align-items: center; gap: 8px; }
     .sb-section-label {
         font-size: 0.59rem;
         font-weight: 700;
@@ -298,7 +306,7 @@ st.markdown("""
 
     /* ── Proje sahibi kartı ── */
     .owner-card {
-        margin: 12px 0 4px;
+        margin: 8px 0 14px 0;
         padding: 10px 12px;
         border-radius: 10px;
         background: #F5F4FF;
@@ -352,7 +360,6 @@ except Exception as e:
 # ==========================================
 # 5. SESSION STATE
 # ==========================================
-# Her rerun'da dosyadan taze oku — sidebar'ın güncel geçmişi görmesi için
 db = load_db()
 
 if "current_chat_id" not in st.session_state:
@@ -365,7 +372,6 @@ if "edit_id" not in st.session_state:
     st.session_state.edit_id = None
 if "liked_msgs" not in st.session_state:
     st.session_state.liked_msgs = []
-# Kart veya chip'ten gelen soruyu taşır; boş string = yok
 if "queued_prompt" not in st.session_state:
     st.session_state.queued_prompt = ""
 
@@ -389,7 +395,6 @@ def group_chats_by_date(chat_dict):
 
 
 def run_ai(prompt: str):
-    """Kullanıcı mesajını gönderir, streaming AI yanıtı alır, state & db günceller."""
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     with st.chat_message("user", avatar="👤"):
@@ -433,15 +438,16 @@ def run_ai(prompt: str):
 # ==========================================
 with st.sidebar:
 
+    # ── FIX 2: Proje sahibi kartı en üstte ──
     st.markdown("""
-        <div class='sb-logo'>
-            <span style='font-size:1.3rem'>⚖️</span>
-            <div>
-                <p style='font-size:0.95rem;font-weight:600;margin:0;color:#1E293B;'>Siber Asistan</p>
-                <p style='font-size:0.68rem;color:#94A3B8;margin:0;font-style:italic;'>Dijital adaletin rehberi.</p>
+        <div class='owner-card'>
+            <div class='owner-avatar'>MH</div>
+            <div class='owner-info'>
+                <div class='owner-name'>Merve Havuz</div>
+                <div class='owner-sub'>Siber Hukuk Asistanı · Okul Projesi</div>
             </div>
+            <span style='font-size:1.2rem;flex-shrink:0;'>⚖️</span>
         </div>
-        <div style='height:12px'></div>
     """, unsafe_allow_html=True)
 
     if st.button("＋ Yeni Analiz Başlat", type="primary", use_container_width=True):
@@ -457,7 +463,7 @@ with st.sidebar:
         label_visibility="collapsed", key="search_input"
     )
 
-    # Geçmiş konuşmalar — her render'da dosyadan taze oku
+    # Geçmiş konuşmalar
     t_db = load_db()
     if search_query:
         t_db = {
@@ -522,26 +528,12 @@ with st.sidebar:
                         st.rerun()
                     st.markdown("</div>", unsafe_allow_html=True)
 
-    # Proje sahibi
-    st.markdown("""
-        <div class='owner-card'>
-            <div class='owner-avatar'>MH</div>
-            <div class='owner-info'>
-                <div class='owner-name'>Merve Havuz</div>
-                <div class='owner-sub'>Siber Hukuk Asistanı<br>Okul Projesi</div>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
-
 # ==========================================
 # 8. ANA EKRAN
 # ==========================================
-
-# Chat aktif mi? (mesaj varsa VEYA kart/chip'e tıklandıysa portal ekranı kaybolur)
 chat_active = bool(st.session_state.messages) or bool(st.session_state.queued_prompt)
 
 if chat_active:
-    # Topbar
     if st.session_state.messages:
         current_title = st.session_state.messages[0].get(
             "title", st.session_state.messages[0]["content"][:35] + "…"
@@ -562,7 +554,6 @@ if chat_active:
         </div>
     """, unsafe_allow_html=True)
 
-    # Mevcut mesajları göster
     for i, msg in enumerate(st.session_state.messages):
         with st.chat_message(msg["role"], avatar="👤" if msg["role"] == "user" else "⚖️"):
             st.markdown(msg["content"])
@@ -616,7 +607,6 @@ else:
                     <div class='welcome-card-desc'>{desc}</div>
                 </div>
             """, unsafe_allow_html=True)
-            # Kartın hemen altında görünmez buton — tıklamayı yakalar
             st.markdown("<div class='card-trigger'>", unsafe_allow_html=True)
             if st.button(f"▸ {title}", key=f"wcard_{idx}", use_container_width=True):
                 st.session_state.queued_prompt = desc
@@ -625,7 +615,6 @@ else:
 
     st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
 
-    # Hızlı chip'ler
     chips = [
         ("📄 Dilekçe oluştur",  "Siber suç için resmi dilekçe oluşturmama yardım et."),
         ("⏱ Başvuru süresi?",   "Siber suçlarda başvuru ve dava açma süreleri nedir?"),
@@ -645,15 +634,12 @@ else:
 # ==========================================
 # 9. SOHBET GİRDİSİ
 # ==========================================
-
-# queued_prompt varsa önce onu çalıştır (kart/chip tıklaması)
 if st.session_state.queued_prompt:
     q = st.session_state.queued_prompt
     st.session_state.queued_prompt = ""
     run_ai(q)
     st.rerun()
 
-# Normal metin girişi
 if prompt := st.chat_input("Hukuki vakayı buraya yazın..."):
     run_ai(prompt)
     st.rerun()
