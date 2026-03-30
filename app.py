@@ -1,9 +1,8 @@
 import streamlit as st
 import google.generativeai as genai
-import time
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 
 # ==========================================
 # 1. SAYFA AYARLARI
@@ -41,7 +40,6 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap');
     * { font-family: 'DM Sans', sans-serif !important; }
 
-    /* ── Streamlit gizleme ── */
     header[data-testid="stHeader"],
     [data-testid="stToolbar"],
     footer,
@@ -49,7 +47,6 @@ st.markdown("""
     [data-testid="stDeployButton"],
     .stAppDeployButton { display: none !important; }
 
-    /* ── Genel arka plan ── */
     .stApp { background-color: #F8FAFC !important; }
 
     /* ── SIDEBAR ── */
@@ -57,8 +54,6 @@ st.markdown("""
         background-color: #FAFAFA !important;
         border-right: 0.5px solid #E5E7EB !important;
     }
-
-    /* Arama kutusu */
     section[data-testid="stSidebar"] [data-testid="stTextInput"] input {
         font-size: 0.8rem !important;
         border-radius: 8px !important;
@@ -71,7 +66,7 @@ st.markdown("""
         color: #94A3B8 !important;
     }
 
-    /* Yeni Analiz butonu – mor */
+    /* Yeni Analiz butonu */
     section[data-testid="stSidebar"] button[kind="primary"] {
         background-color: #534AB7 !important;
         border-color: #534AB7 !important;
@@ -81,41 +76,51 @@ st.markdown("""
     }
     section[data-testid="stSidebar"] button[kind="primary"]:hover {
         background-color: #4339A8 !important;
-        border-color: #4339A8 !important;
     }
 
-    /* Sidebar geçmiş satırları */
-    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {
-        align-items: center !important;
-        background: transparent;
-        transition: background 0.15s;
-        border-radius: 6px;
-        margin-bottom: 2px;
-    }
-    [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:hover {
-        background: #F1F5F9;
-    }
-
-    /* Geçmiş satır metin kesimi */
-    [data-testid="stSidebar"] .stButton button p {
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        font-size: 0.82rem !important;
-        text-align: left !important;
-    }
-
-    /* Düzenle / Sil ikon butonları */
-    [data-testid="stSidebar"] [data-testid="column"] .stButton button {
-        height: 26px !important;
-        min-height: 26px !important;
-        width: 26px !important;
-        padding: 0 !important;
-        display: grid !important;
-        place-items: center !important;
-        font-size: 0.7rem !important;
+    /* Sidebar tüm secondary butonları sıfırla */
+    section[data-testid="stSidebar"] .stButton > button {
         border: none !important;
         background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    /* History item butonları */
+    section[data-testid="stSidebar"] .history-btn > button {
+        text-align: left !important;
+        font-size: 0.8rem !important;
+        color: #4B5563 !important;
+        border-radius: 8px !important;
+        padding: 7px 10px !important;
+        width: 100% !important;
+        transition: background 0.12s !important;
+    }
+    section[data-testid="stSidebar"] .history-btn > button:hover {
+        background: #F1F5F9 !important;
+        color: #1E293B !important;
+    }
+    section[data-testid="stSidebar"] .history-btn-active > button {
+        background: #EEEDFE !important;
+        color: #534AB7 !important;
+        font-weight: 600 !important;
+        border-left: 2px solid #534AB7 !important;
+        border-radius: 0 8px 8px 0 !important;
+        padding-left: 12px !important;
+    }
+
+    /* Icon butonlar */
+    section[data-testid="stSidebar"] .icon-btn > button {
+        width: 24px !important;
+        height: 24px !important;
+        min-height: 24px !important;
+        padding: 0 !important;
+        font-size: 0.65rem !important;
+        color: #CBD5E1 !important;
+        border-radius: 5px !important;
+    }
+    section[data-testid="stSidebar"] .icon-btn > button:hover {
+        background: #F1F5F9 !important;
+        color: #534AB7 !important;
     }
 
     /* ── MESAJ BALONLARI ── */
@@ -123,8 +128,6 @@ st.markdown("""
         padding: 0.5rem 0 !important;
         line-height: 1.65 !important;
     }
-
-    /* Kullanıcı balonu – mor zemin, beyaz yazı */
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) .stMarkdown {
         background-color: #534AB7 !important;
         border: none !important;
@@ -139,8 +142,6 @@ st.markdown("""
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) .stMarkdown strong {
         color: #FFFFFF !important;
     }
-
-    /* Asistan balonu – beyaz zemin, border */
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) .stMarkdown {
         background-color: #FFFFFF !important;
         border: 0.5px solid #E2E8F0 !important;
@@ -153,31 +154,26 @@ st.markdown("""
         color: #1E293B !important;
     }
 
-    /* Gönder butonu – mor */
+    /* Chat input */
     [data-testid="stChatInput"] button {
         background-color: #534AB7 !important;
         color: white !important;
         border-radius: 8px !important;
     }
-    [data-testid="stChatInput"] button:hover {
-        background-color: #4339A8 !important;
-    }
-
-    /* Input textarea */
+    [data-testid="stChatInput"] button:hover { background-color: #4339A8 !important; }
     [data-testid="stChatInput"] textarea {
         border-radius: 12px !important;
         border: 0.5px solid #E2E8F0 !important;
         font-size: 0.875rem !important;
     }
 
-    /* Ana içerik genişliği */
     .block-container {
         max-width: 860px !important;
         padding-top: 1rem !important;
         padding-bottom: 0 !important;
     }
 
-    /* ── Yazıyor animasyonu ── */
+    /* Yazıyor animasyonu */
     @keyframes typing-bounce {
         0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
         40%            { opacity: 1;    transform: translateY(-5px); }
@@ -193,8 +189,8 @@ st.markdown("""
     .typing-dot:nth-child(2) { animation-delay: 0.2s; }
     .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
-    /* ── Aksiyon butonları (kopyala, beğen vb.) ── */
-    .action-row button {
+    /* Aksiyon butonları */
+    .action-row .stButton > button {
         background: transparent !important;
         border: 0.5px solid #E2E8F0 !important;
         border-radius: 6px !important;
@@ -203,28 +199,11 @@ st.markdown("""
         padding: 2px 8px !important;
         height: 24px !important;
         min-height: 24px !important;
-        line-height: 1 !important;
     }
-    .action-row button:hover {
+    .action-row .stButton > button:hover {
         background: #F8FAFC !important;
         color: #534AB7 !important;
         border-color: #AFA9EC !important;
-    }
-
-    /* ── Hızlı öneri chip'leri ── */
-    .chip-row button {
-        background: #EEEDFE !important;
-        color: #534AB7 !important;
-        border: 0.5px solid #AFA9EC !important;
-        border-radius: 20px !important;
-        font-size: 0.78rem !important;
-        font-weight: 400 !important;
-        padding: 5px 14px !important;
-        white-space: nowrap !important;
-    }
-    .chip-row button:hover {
-        background: #DDD9FC !important;
-        border-color: #7F77DD !important;
     }
 
     /* ── Portal başlığı ── */
@@ -243,132 +222,44 @@ st.markdown("""
         border: 0.5px solid #E2E8F0;
         border-radius: 12px;
         padding: 14px 16px;
-        margin-bottom: 8px;
+        margin-bottom: 2px;
         transition: border-color 0.15s, box-shadow 0.15s;
-        cursor: pointer;
     }
     .welcome-card:hover {
         border-color: #AFA9EC;
         box-shadow: 0 2px 10px rgba(83,74,183,0.08);
     }
-    .welcome-card-icon { font-size: 1.1rem; margin-bottom: 6px; display: block; }
-    .welcome-card-title { font-size: 0.85rem; font-weight: 500; color: #1E293B; }
-    .welcome-card-desc  { font-size: 0.75rem; color: #64748B; margin-top: 2px; }
+    .welcome-card-icon  { font-size: 1.1rem; margin-bottom: 6px; display: block; }
+    .welcome-card-title { font-size: 0.85rem; font-weight: 600; color: #1E293B; }
+    .welcome-card-desc  { font-size: 0.73rem; color: #64748B; margin-top: 3px; line-height: 1.4; }
 
-    /* Hoşgeldin kartı buton gizleme (arka plandaki stButton) */
-    .welcome-btn-wrap button {
-        position: absolute !important;
+    /* Kart butonlarını gizle – kartın tam altına konur, gizli tıklama alanı */
+    .card-trigger .stButton > button {
+        margin-top: -2px !important;
         opacity: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-        top: 0 !important;
-        left: 0 !important;
+        height: 2px !important;
+        min-height: 2px !important;
+        padding: 0 !important;
+        border: none !important;
         cursor: pointer !important;
-    }
-    .welcome-btn-wrap {
-        position: relative !important;
-        margin-bottom: 8px !important;
+        width: 100% !important;
     }
 
-    /* ── Yasal uyarı ── */
-    .disclaimer {
-        text-align: center;
-        font-size: 0.7rem;
-        color: #94A3B8;
-        padding: 6px 16px 2px;
-        border-top: 0.5px solid #F1F5F9;
-        margin-top: 6px;
+    /* ── Chip butonları ── */
+    .chip-wrap .stButton > button {
+        background: #F1F0FD !important;
+        color: #534AB7 !important;
+        border: 0.5px solid #C4C0F0 !important;
+        border-radius: 20px !important;
+        font-size: 0.76rem !important;
+        font-weight: 500 !important;
+        padding: 6px 14px !important;
+        white-space: nowrap !important;
+        transition: all 0.15s !important;
     }
-
-    /* ── Sidebar etiket stilleri ── */
-    .sb-logo  { padding: 8px 4px 0; display: flex; align-items: center; gap: 8px; }
-    .sb-label {
-        font-size: 0.63rem;
-        font-weight: 600;
-        color: #9CA3AF;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        padding: 10px 4px 4px;
-    }
-
-    /* ── Geçmiş konuşma satırları – modernleştirilmiş ── */
-    .history-item {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 7px 8px;
-        border-radius: 8px;
-        margin-bottom: 2px;
-        background: transparent;
-        transition: background 0.15s;
-        cursor: pointer;
-    }
-    .history-item:hover { background: #F1F5F9; }
-    .history-item.active {
-        background: #EEEDFE;
-        border-left: 2px solid #534AB7;
-    }
-    .history-icon {
-        font-size: 0.75rem;
-        color: #CBD5E1;
-        flex-shrink: 0;
-    }
-    .history-text {
-        font-size: 0.8rem;
-        color: #374151;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        flex: 1;
-        min-width: 0;
-    }
-    .history-item.active .history-text { color: #534AB7; font-weight: 500; }
-    .history-actions {
-        display: flex;
-        gap: 2px;
-        opacity: 0;
-        transition: opacity 0.15s;
-    }
-    .history-item:hover .history-actions { opacity: 1; }
-    .history-action-btn {
-        width: 20px; height: 20px;
-        border-radius: 4px;
-        border: none;
-        background: transparent;
-        color: #94A3B8;
-        font-size: 0.65rem;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: background 0.1s, color 0.1s;
-    }
-    .history-action-btn:hover { background: #E2E8F0; color: #534AB7; }
-
-    /* ── Proje sahibi bilgi kartı ── */
-    .project-owner-card {
-        margin-top: 10px;
-        padding: 10px 12px;
-        border-top: 0.5px solid #F1F5F9;
-    }
-    .project-owner-label {
-        font-size: 0.58rem;
-        font-weight: 600;
-        color: #CBD5E1;
-        text-transform: uppercase;
-        letter-spacing: 0.07em;
-        margin-bottom: 5px;
-    }
-    .project-owner-name {
-        font-size: 0.82rem;
-        font-weight: 600;
-        color: #374151;
-        letter-spacing: -0.2px;
-    }
-    .project-owner-sub {
-        font-size: 0.68rem;
-        color: #94A3B8;
-        margin-top: 1px;
+    .chip-wrap .stButton > button:hover {
+        background: #DDD9FC !important;
+        border-color: #7F77DD !important;
     }
 
     /* ── Topbar ── */
@@ -381,7 +272,7 @@ st.markdown("""
         margin-bottom: 6px;
     }
     .topbar-left  { display: flex; align-items: center; gap: 8px; }
-    .status-dot   { width: 8px; height: 8px; background: #1D9E75; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .status-dot   { width: 7px; height: 7px; background: #1D9E75; border-radius: 50%; flex-shrink: 0; }
     .topbar-title { font-size: 0.88rem; font-weight: 500; color: #1E293B; }
     .topbar-right { display: flex; gap: 6px; }
     .topbar-btn {
@@ -392,9 +283,56 @@ st.markdown("""
         font-size: 0.73rem;
         color: #64748B;
         background: #FFFFFF;
-        cursor: default;
     }
-    .topbar-btn:hover { background: #F8FAFC; color: #534AB7; border-color: #AFA9EC; }
+
+    /* ── Sidebar etiketler ── */
+    .sb-logo { padding: 8px 4px 0; display: flex; align-items: center; gap: 8px; }
+    .sb-section-label {
+        font-size: 0.59rem;
+        font-weight: 700;
+        color: #C4C9D4;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        padding: 12px 2px 4px;
+    }
+
+    /* ── Proje sahibi kartı ── */
+    .owner-card {
+        margin: 12px 0 4px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #F5F4FF;
+        border: 0.5px solid #DDD9FC;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .owner-avatar {
+        width: 32px; height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #7B73E4 0%, #534AB7 100%);
+        color: #fff;
+        font-size: 0.72rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        letter-spacing: 0.5px;
+    }
+    .owner-info { flex: 1; min-width: 0; }
+    .owner-name { font-size: 0.81rem; font-weight: 600; color: #2D2A6E; line-height: 1.3; }
+    .owner-sub  { font-size: 0.64rem; color: #9491C8; margin-top: 1px; line-height: 1.4; }
+
+    /* ── Disclaimer ── */
+    .disclaimer {
+        text-align: center;
+        font-size: 0.7rem;
+        color: #94A3B8;
+        padding: 6px 16px 2px;
+        border-top: 0.5px solid #F1F5F9;
+        margin-top: 6px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -412,7 +350,7 @@ except Exception as e:
     st.stop()
 
 # ==========================================
-# 5. DATA & SESSION STATE
+# 5. SESSION STATE
 # ==========================================
 db = load_db()
 
@@ -426,36 +364,31 @@ if "edit_id" not in st.session_state:
     st.session_state.edit_id = None
 if "liked_msgs" not in st.session_state:
     st.session_state.liked_msgs = []
-# Kart/chip tıklamasından gelen prompt
-if "pending_prompt" not in st.session_state:
-    st.session_state.pending_prompt = None
+# Kart veya chip'ten gelen soruyu taşır; boş string = yok
+if "queued_prompt" not in st.session_state:
+    st.session_state.queued_prompt = ""
 
 # ==========================================
 # 6. YARDIMCI FONKSİYONLAR
 # ==========================================
 def group_chats_by_date(chat_dict):
-    """Konuşmaları tarihe göre gruplandır."""
     today = datetime.now().date()
-    groups = {"Bugün": [], "Bu Hafta": [], "Geçen Hafta": [], "Daha Önce": []}
+    groups = {"Bugün": [], "Bu Hafta": [], "Geçen Hafta": [], "Eskiler": []}
     for cid in sorted(chat_dict.keys(), reverse=True):
         try:
-            chat_date = datetime.strptime(cid, "%Y%m%d_%H%M%S").date()
-            diff = (today - chat_date).days
-            if diff == 0:
-                groups["Bugün"].append(cid)
-            elif diff <= 7:
-                groups["Bu Hafta"].append(cid)
-            elif diff <= 14:
-                groups["Geçen Hafta"].append(cid)
-            else:
-                groups["Daha Önce"].append(cid)
+            d = datetime.strptime(cid, "%Y%m%d_%H%M%S").date()
+            diff = (today - d).days
+            if diff == 0:      groups["Bugün"].append(cid)
+            elif diff <= 7:    groups["Bu Hafta"].append(cid)
+            elif diff <= 14:   groups["Geçen Hafta"].append(cid)
+            else:              groups["Eskiler"].append(cid)
         except:
-            groups["Daha Önce"].append(cid)
+            groups["Eskiler"].append(cid)
     return groups
 
 
-def send_message(prompt: str):
-    """Verilen prompt'u işleyerek AI yanıtını döndürür ve state'i günceller."""
+def run_ai(prompt: str):
+    """Kullanıcı mesajını gönderir, streaming AI yanıtı alır, state & db günceller."""
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     with st.chat_message("user", avatar="👤"):
@@ -464,8 +397,8 @@ def send_message(prompt: str):
     with st.chat_message("assistant", avatar="⚖️"):
         placeholder = st.empty()
         placeholder.markdown("""
-            <div style='display:flex; align-items:center; gap:8px;
-                        color:#94A3B8; font-size:0.85rem; padding:4px 0;'>
+            <div style='display:flex;align-items:center;gap:8px;
+                        color:#94A3B8;font-size:0.85rem;padding:4px 0;'>
                 <span>⚖️ &nbsp;Analiz ediliyor</span>
                 <span class='typing-dot'></span>
                 <span class='typing-dot'></span>
@@ -476,12 +409,10 @@ def send_message(prompt: str):
         try:
             full_prompt = f"{SISTEM_PROMPTU}\n\nKullanıcı Sorusu: {prompt}"
             response = st.session_state.chat_session.send_message(full_prompt, stream=True)
-
             full_res = ""
             for chunk in response:
                 full_res += chunk.text
                 placeholder.markdown(full_res + "▌")
-
             placeholder.markdown(full_res)
 
             if len(st.session_state.messages) == 1:
@@ -491,7 +422,7 @@ def send_message(prompt: str):
             db[st.session_state.current_chat_id] = st.session_state.messages
             save_db(db)
 
-        except Exception as e:
+        except Exception:
             placeholder.markdown("")
             st.error("Bir hata oluştu. Lütfen API anahtarınızı kontrol edin.")
 
@@ -500,42 +431,36 @@ def send_message(prompt: str):
 # ==========================================
 with st.sidebar:
 
-    # Logo + başlık
     st.markdown("""
         <div class='sb-logo'>
             <span style='font-size:1.3rem'>⚖️</span>
             <div>
-                <p style='font-size:0.95rem; font-weight:600; margin:0; color:#1E293B;'>Siber Asistan</p>
-                <p style='font-size:0.7rem; color:#94A3B8; margin:0; font-style:italic;'>Dijital adaletin rehberi.</p>
+                <p style='font-size:0.95rem;font-weight:600;margin:0;color:#1E293B;'>Siber Asistan</p>
+                <p style='font-size:0.68rem;color:#94A3B8;margin:0;font-style:italic;'>Dijital adaletin rehberi.</p>
             </div>
         </div>
         <div style='height:12px'></div>
     """, unsafe_allow_html=True)
 
-    # Yeni analiz butonu
     if st.button("＋ Yeni Analiz Başlat", type="primary", use_container_width=True):
         st.session_state.current_chat_id = datetime.now().strftime("%Y%m%d_%H%M%S")
         st.session_state.messages = []
         st.session_state.chat_session = model.start_chat(history=[])
-        st.session_state.pending_prompt = None
+        st.session_state.queued_prompt = ""
         st.rerun()
 
-    # Konuşma arama kutusu
     st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
     search_query = st.text_input(
-        label="ara",
-        placeholder="🔍  Konuşmalarda ara...",
-        label_visibility="collapsed",
-        key="search_input"
+        label="ara", placeholder="🔍  Konuşmalarda ara...",
+        label_visibility="collapsed", key="search_input"
     )
 
-    # ── Geçmiş konuşmalar – modernleştirilmiş ──
+    # Geçmiş konuşmalar
     t_db = db.copy()
-
     if search_query:
         t_db = {
             cid: msgs for cid, msgs in t_db.items()
-            if any(search_query.lower() in msg.get("content", "").lower() for msg in msgs)
+            if any(search_query.lower() in m.get("content", "").lower() for m in msgs)
         }
 
     grouped = group_chats_by_date(t_db)
@@ -543,56 +468,49 @@ with st.sidebar:
     for group_name, cids in grouped.items():
         if not cids:
             continue
-        st.markdown(f"<div class='sb-label'>{group_name}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='sb-section-label'>{group_name}</div>", unsafe_allow_html=True)
 
         for cid in cids:
             is_active = cid == st.session_state.current_chat_id
 
             if st.session_state.edit_id == cid:
-                # Düzenleme modu
                 new_val = st.text_input(
                     "Düzenle",
-                    value=t_db[cid][0].get("title", "Analiz"),
-                    key=f"r_{cid}",
-                    label_visibility="collapsed"
+                    value=(t_db[cid][0].get("title") or "Analiz") if t_db[cid] else "Analiz",
+                    key=f"r_{cid}", label_visibility="collapsed"
                 )
-                col_s, col_c = st.columns(2)
-                with col_s:
+                cs, cc = st.columns(2)
+                with cs:
                     if st.button("✓ Kaydet", key=f"s_{cid}", use_container_width=True):
                         t_db[cid][0]["title"] = new_val
                         save_db(t_db)
                         st.session_state.edit_id = None
                         st.rerun()
-                with col_c:
+                with cc:
                     if st.button("✕ İptal", key=f"c_{cid}", use_container_width=True):
                         st.session_state.edit_id = None
                         st.rerun()
             else:
-                title = t_db[cid][0].get("title", t_db[cid][0]["content"][:22]) if t_db[cid] else "Analiz"
-                active_class = "active" if is_active else ""
+                title = (t_db[cid][0].get("title") or t_db[cid][0]["content"][:22]) if t_db[cid] else "Analiz"
+                active_cls = "history-btn-active" if is_active else "history-btn"
 
-                # Modern history item satırı
-                c1, c2, c3 = st.columns([0.76, 0.12, 0.12])
-                with c1:
-                    # Görsel satır
-                    st.markdown(f"""
-                        <div class='history-item {active_class}'>
-                            <span class='history-icon'>{'◆' if is_active else '◇'}</span>
-                            <span class='history-text'>{title}</span>
-                        </div>
-                    """, unsafe_allow_html=True)
-                    # Tıklanabilir şeffaf buton
-                    if st.button("‎", key=f"ch_{cid}", use_container_width=True,
-                                 help=title):
+                row_c, edit_c, del_c = st.columns([0.76, 0.12, 0.12])
+                with row_c:
+                    st.markdown(f"<div class='{active_cls}'>", unsafe_allow_html=True)
+                    if st.button(title, key=f"ch_{cid}", use_container_width=True):
                         st.session_state.current_chat_id = cid
                         st.session_state.messages = t_db[cid]
-                        st.session_state.pending_prompt = None
+                        st.session_state.queued_prompt = ""
                         st.rerun()
-                with c2:
+                    st.markdown("</div>", unsafe_allow_html=True)
+                with edit_c:
+                    st.markdown("<div class='icon-btn'>", unsafe_allow_html=True)
                     if st.button("✎", key=f"e_{cid}", help="Yeniden adlandır"):
                         st.session_state.edit_id = cid
                         st.rerun()
-                with c3:
+                    st.markdown("</div>", unsafe_allow_html=True)
+                with del_c:
+                    st.markdown("<div class='icon-btn'>", unsafe_allow_html=True)
                     if st.button("🗑", key=f"d_{cid}", help="Sil"):
                         del t_db[cid]
                         save_db(t_db)
@@ -600,13 +518,16 @@ with st.sidebar:
                             st.session_state.messages = []
                             st.session_state.current_chat_id = datetime.now().strftime("%Y%m%d_%H%M%S")
                         st.rerun()
+                    st.markdown("</div>", unsafe_allow_html=True)
 
-    # ── Proje sahibi bilgi kartı (en alt) ──
+    # Proje sahibi
     st.markdown("""
-        <div class='project-owner-card'>
-            <div class='project-owner-label'>Proje Sahibi</div>
-            <div class='project-owner-name'>Merve Havuz</div>
-            <div class='project-owner-sub'>Siber Hukuk Asistanı · Okul Projesi</div>
+        <div class='owner-card'>
+            <div class='owner-avatar'>MH</div>
+            <div class='owner-info'>
+                <div class='owner-name'>Merve Havuz</div>
+                <div class='owner-sub'>Siber Hukuk Asistanı<br>Okul Projesi</div>
+            </div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -614,12 +535,18 @@ with st.sidebar:
 # 8. ANA EKRAN
 # ==========================================
 
-# Topbar – aktif konuşma varsa göster
-if st.session_state.messages:
-    current_title = st.session_state.messages[0].get(
-        "title",
-        st.session_state.messages[0]["content"][:35] + "…"
-    )
+# Chat aktif mi? (mesaj varsa VEYA kart/chip'e tıklandıysa portal ekranı kaybolur)
+chat_active = bool(st.session_state.messages) or bool(st.session_state.queued_prompt)
+
+if chat_active:
+    # Topbar
+    if st.session_state.messages:
+        current_title = st.session_state.messages[0].get(
+            "title", st.session_state.messages[0]["content"][:35] + "…"
+        )
+    else:
+        current_title = st.session_state.queued_prompt[:35] + "…"
+
     st.markdown(f"""
         <div class='topbar'>
             <div class='topbar-left'>
@@ -633,26 +560,53 @@ if st.session_state.messages:
         </div>
     """, unsafe_allow_html=True)
 
-# ── Boş ekran – hoşgeldin kartları & chip'ler ──
-if not st.session_state.messages:
+    # Mevcut mesajları göster
+    for i, msg in enumerate(st.session_state.messages):
+        with st.chat_message(msg["role"], avatar="👤" if msg["role"] == "user" else "⚖️"):
+            st.markdown(msg["content"])
+
+            if msg["role"] == "assistant":
+                st.markdown("<div style='height:3px'></div>", unsafe_allow_html=True)
+                st.markdown("<div class='action-row'>", unsafe_allow_html=True)
+                ac1, ac2, ac3, ac4, _gap = st.columns([0.13, 0.08, 0.08, 0.13, 0.58])
+                with ac1:
+                    if st.button("📋 Kopyala", key=f"copy_{i}"):
+                        st.toast("Panoya kopyalandı ✓", icon="✅")
+                with ac2:
+                    liked = i in st.session_state.liked_msgs
+                    lbl = "👍✓" if liked else "👍"
+                    if st.button(lbl, key=f"like_{i}"):
+                        if i not in st.session_state.liked_msgs:
+                            st.session_state.liked_msgs.append(i)
+                            st.toast("Geri bildirim alındı!", icon="👍")
+                with ac3:
+                    if st.button("👎", key=f"dislike_{i}"):
+                        st.toast("Geri bildirim alındı.", icon="👎")
+                with ac4:
+                    if st.button("↺ Yenile", key=f"regen_{i}"):
+                        st.toast("Yanıt yenileniyor…", icon="↺")
+                st.markdown("</div>", unsafe_allow_html=True)
+
+else:
+    # ── PORTAL / KARŞILAMA EKRANI ──
     st.markdown('<h1 class="portal-title">⚖️ Siber Hukuk Portalı</h1>', unsafe_allow_html=True)
     st.markdown(
-        '<p style="text-align:center;color:#64748B;margin-bottom:1.6rem;">'
+        '<p style="text-align:center;color:#64748B;margin-bottom:1.5rem;font-size:0.9rem;">'
         'Hukuki vakayı veya dijital haklarınızı yazın.</p>',
         unsafe_allow_html=True
     )
 
     welcome_items = [
-        ("🔒", "KVKK İhlali",          "Kişisel veri ihlali durumunda ne yapmalıyım?"),
-        ("💻", "Siber Saldırı",         "Sisteme izinsiz erişimde hukuki adımlar nelerdir?"),
-        ("📱", "Sosyal Medya Hukuku",   "İnternette hakaret ve iftira davası nasıl açılır?"),
-        ("🏛️", "Şikayet Dilekçesi",     "BTK'ya şikayet dilekçesi nasıl hazırlanır?"),
+        ("🔒", "KVKK İhlali",         "Kişisel veri ihlali durumunda ne yapmalıyım?"),
+        ("💻", "Siber Saldırı",        "Sisteme izinsiz erişimde hukuki adımlar nelerdir?"),
+        ("📱", "Sosyal Medya Hukuku",  "İnternette hakaret ve iftira davası nasıl açılır?"),
+        ("🏛️", "Şikayet Dilekçesi",   "BTK'ya şikayet dilekçesi nasıl hazırlanır?"),
     ]
 
     col_a, col_b = st.columns(2)
     for idx, (icon, title, desc) in enumerate(welcome_items):
-        with col_a if idx % 2 == 0 else col_b:
-            # Kartı HTML ile göster
+        col = col_a if idx % 2 == 0 else col_b
+        with col:
             st.markdown(f"""
                 <div class='welcome-card'>
                     <span class='welcome-card-icon'>{icon}</span>
@@ -660,77 +614,49 @@ if not st.session_state.messages:
                     <div class='welcome-card-desc'>{desc}</div>
                 </div>
             """, unsafe_allow_html=True)
-            # Kartın altına şeffaf Streamlit butonu (tıklanabilirlik için)
-            if st.button(f"{icon} {title}", key=f"wcard_{idx}", use_container_width=True):
-                st.session_state.pending_prompt = desc
+            # Kartın hemen altında görünmez buton — tıklamayı yakalar
+            st.markdown("<div class='card-trigger'>", unsafe_allow_html=True)
+            if st.button(f"▸ {title}", key=f"wcard_{idx}", use_container_width=True):
+                st.session_state.queued_prompt = desc
+                st.rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("<div style='height:0.8rem'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
 
-    # Chip butonları
-    st.markdown("<div class='chip-row'>", unsafe_allow_html=True)
-    ch1, ch2, ch3, ch4 = st.columns([0.28, 0.25, 0.25, 0.22])
+    # Hızlı chip'ler
     chips = [
-        (ch1, "📄 Dilekçe oluştur",   "Siber suç için dilekçe oluşturmama yardım et."),
-        (ch2, "⏱ Başvuru süresi?",    "Siber suçlarda başvuru ve dava açma süreleri nedir?"),
-        (ch3, "💰 Ceza miktarı?",      "Siber suçlarda öngörülen ceza miktarları nedir?"),
-        (ch4, "🔍 Kanun maddeleri",    "Türkiye'de siber suçlarla ilgili kanun maddeleri nelerdir?"),
+        ("📄 Dilekçe oluştur",  "Siber suç için resmi dilekçe oluşturmama yardım et."),
+        ("⏱ Başvuru süresi?",   "Siber suçlarda başvuru ve dava açma süreleri nedir?"),
+        ("💰 Ceza miktarı?",    "Siber suçlarda öngörülen ceza miktarları nedir?"),
+        ("🔍 Kanun maddeleri",  "Türkiye'de siber suçlarla ilgili kanun maddeleri nelerdir?"),
     ]
-    for col, label, question in chips:
+    st.markdown("<div class='chip-wrap'>", unsafe_allow_html=True)
+    chip_cols = st.columns(len(chips))
+    for col, (label, question) in zip(chip_cols, chips):
         with col:
             if st.button(label, key=f"chip_{label}"):
-                st.session_state.pending_prompt = question
+                st.session_state.queued_prompt = question
+                st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
-
-# ── Mevcut mesajları göster ──
-for i, msg in enumerate(st.session_state.messages):
-    with st.chat_message(msg["role"], avatar="👤" if msg["role"] == "user" else "⚖️"):
-        st.markdown(msg["content"])
-
-        if msg["role"] == "assistant":
-            st.markdown("<div style='height:3px'></div>", unsafe_allow_html=True)
-            st.markdown("<div class='action-row'>", unsafe_allow_html=True)
-            ac1, ac2, ac3, ac4, _gap = st.columns([0.13, 0.08, 0.08, 0.13, 0.58])
-
-            with ac1:
-                if st.button("📋 Kopyala", key=f"copy_{i}"):
-                    st.toast("Panoya kopyalandı ✓", icon="✅")
-
-            with ac2:
-                liked = i in st.session_state.liked_msgs
-                label = "👍✓" if liked else "👍"
-                if st.button(label, key=f"like_{i}"):
-                    if i not in st.session_state.liked_msgs:
-                        st.session_state.liked_msgs.append(i)
-                        st.toast("Geri bildirim alındı!", icon="👍")
-
-            with ac3:
-                if st.button("👎", key=f"dislike_{i}"):
-                    st.toast("Geri bildirim alındı.", icon="👎")
-
-            with ac4:
-                if st.button("↺ Yenile", key=f"regen_{i}"):
-                    st.toast("Yanıt yenileniyor…", icon="↺")
-
-            st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
 
 # ==========================================
 # 9. SOHBET GİRDİSİ
 # ==========================================
 
-# Kart / chip tıklamasından gelen pending prompt'u işle
-if st.session_state.pending_prompt:
-    prompt_to_send = st.session_state.pending_prompt
-    st.session_state.pending_prompt = None
-    send_message(prompt_to_send)
+# queued_prompt varsa önce onu çalıştır (kart/chip tıklaması)
+if st.session_state.queued_prompt:
+    q = st.session_state.queued_prompt
+    st.session_state.queued_prompt = ""
+    run_ai(q)
     st.rerun()
 
-# Ana chat input
+# Normal metin girişi
 if prompt := st.chat_input("Hukuki vakayı buraya yazın..."):
-    send_message(prompt)
+    run_ai(prompt)
     st.rerun()
 
-# Yasal uyarı
+# Disclaimer
 st.markdown("""
     <div class='disclaimer'>
         ⚠️ Bu platform hukuki tavsiye niteliği taşımamaktadır.
