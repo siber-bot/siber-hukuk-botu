@@ -352,6 +352,7 @@ except Exception as e:
 # ==========================================
 # 5. SESSION STATE
 # ==========================================
+# Her rerun'da dosyadan taze oku — sidebar'ın güncel geçmişi görmesi için
 db = load_db()
 
 if "current_chat_id" not in st.session_state:
@@ -419,8 +420,9 @@ def run_ai(prompt: str):
                 st.session_state.messages[0]["title"] = prompt[:25]
 
             st.session_state.messages.append({"role": "assistant", "content": full_res})
-            db[st.session_state.current_chat_id] = st.session_state.messages
-            save_db(db)
+            fresh_db = load_db()
+            fresh_db[st.session_state.current_chat_id] = st.session_state.messages
+            save_db(fresh_db)
 
         except Exception:
             placeholder.markdown("")
@@ -455,8 +457,8 @@ with st.sidebar:
         label_visibility="collapsed", key="search_input"
     )
 
-    # Geçmiş konuşmalar
-    t_db = db.copy()
+    # Geçmiş konuşmalar — her render'da dosyadan taze oku
+    t_db = load_db()
     if search_query:
         t_db = {
             cid: msgs for cid, msgs in t_db.items()
