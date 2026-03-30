@@ -245,6 +245,7 @@ st.markdown("""
         padding: 14px 16px;
         margin-bottom: 8px;
         transition: border-color 0.15s, box-shadow 0.15s;
+        cursor: pointer;
     }
     .welcome-card:hover {
         border-color: #AFA9EC;
@@ -253,6 +254,21 @@ st.markdown("""
     .welcome-card-icon { font-size: 1.1rem; margin-bottom: 6px; display: block; }
     .welcome-card-title { font-size: 0.85rem; font-weight: 500; color: #1E293B; }
     .welcome-card-desc  { font-size: 0.75rem; color: #64748B; margin-top: 2px; }
+
+    /* Hoşgeldin kartı buton gizleme (arka plandaki stButton) */
+    .welcome-btn-wrap button {
+        position: absolute !important;
+        opacity: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        top: 0 !important;
+        left: 0 !important;
+        cursor: pointer !important;
+    }
+    .welcome-btn-wrap {
+        position: relative !important;
+        margin-bottom: 8px !important;
+    }
 
     /* ── Yasal uyarı ── */
     .disclaimer {
@@ -275,36 +291,85 @@ st.markdown("""
         padding: 10px 4px 4px;
     }
 
-    /* ── Kullanıcı profil satırı ── */
-    .user-profile {
+    /* ── Geçmiş konuşma satırları – modernleştirilmiş ── */
+    .history-item {
         display: flex;
         align-items: center;
-        gap: 8px;
-        padding: 8px 10px;
-        border: 0.5px solid #E5E7EB;
-        border-radius: 10px;
-        background: #FFFFFF;
-        margin-top: 8px;
+        gap: 6px;
+        padding: 7px 8px;
+        border-radius: 8px;
+        margin-bottom: 2px;
+        background: transparent;
+        transition: background 0.15s;
+        cursor: pointer;
     }
-    .user-avatar {
-        width: 30px; height: 30px;
-        border-radius: 50%;
+    .history-item:hover { background: #F1F5F9; }
+    .history-item.active {
         background: #EEEDFE;
-        color: #534AB7;
-        font-size: 11px;
-        font-weight: 600;
+        border-left: 2px solid #534AB7;
+    }
+    .history-icon {
+        font-size: 0.75rem;
+        color: #CBD5E1;
+        flex-shrink: 0;
+    }
+    .history-text {
+        font-size: 0.8rem;
+        color: #374151;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex: 1;
+        min-width: 0;
+    }
+    .history-item.active .history-text { color: #534AB7; font-weight: 500; }
+    .history-actions {
+        display: flex;
+        gap: 2px;
+        opacity: 0;
+        transition: opacity 0.15s;
+    }
+    .history-item:hover .history-actions { opacity: 1; }
+    .history-action-btn {
+        width: 20px; height: 20px;
+        border-radius: 4px;
+        border: none;
+        background: transparent;
+        color: #94A3B8;
+        font-size: 0.65rem;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        flex-shrink: 0;
+        cursor: pointer;
+        transition: background 0.1s, color 0.1s;
     }
-    .user-name { font-size: 0.82rem; font-weight: 500; color: #1E293B; line-height: 1.2; }
-    .user-plan {
-        font-size: 0.67rem; color: #534AB7;
-        background: #EEEDFE; border-radius: 10px;
-        padding: 1px 6px; display: inline-block; line-height: 1.5;
+    .history-action-btn:hover { background: #E2E8F0; color: #534AB7; }
+
+    /* ── Proje sahibi bilgi kartı ── */
+    .project-owner-card {
+        margin-top: 10px;
+        padding: 10px 12px;
+        border-top: 0.5px solid #F1F5F9;
     }
-    .settings-icon { margin-left: auto; font-size: 0.9rem; color: #CBD5E1; }
+    .project-owner-label {
+        font-size: 0.58rem;
+        font-weight: 600;
+        color: #CBD5E1;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        margin-bottom: 5px;
+    }
+    .project-owner-name {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #374151;
+        letter-spacing: -0.2px;
+    }
+    .project-owner-sub {
+        font-size: 0.68rem;
+        color: #94A3B8;
+        margin-top: 1px;
+    }
 
     /* ── Topbar ── */
     .topbar {
@@ -360,7 +425,10 @@ if "chat_session" not in st.session_state:
 if "edit_id" not in st.session_state:
     st.session_state.edit_id = None
 if "liked_msgs" not in st.session_state:
-    st.session_state.liked_msgs = []   # beğenilen mesaj index'leri
+    st.session_state.liked_msgs = []
+# Kart/chip tıklamasından gelen prompt
+if "pending_prompt" not in st.session_state:
+    st.session_state.pending_prompt = None
 
 # ==========================================
 # 6. YARDIMCI FONKSİYONLAR
@@ -385,6 +453,48 @@ def group_chats_by_date(chat_dict):
             groups["Daha Önce"].append(cid)
     return groups
 
+
+def send_message(prompt: str):
+    """Verilen prompt'u işleyerek AI yanıtını döndürür ve state'i günceller."""
+    st.session_state.messages.append({"role": "user", "content": prompt})
+
+    with st.chat_message("user", avatar="👤"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant", avatar="⚖️"):
+        placeholder = st.empty()
+        placeholder.markdown("""
+            <div style='display:flex; align-items:center; gap:8px;
+                        color:#94A3B8; font-size:0.85rem; padding:4px 0;'>
+                <span>⚖️ &nbsp;Analiz ediliyor</span>
+                <span class='typing-dot'></span>
+                <span class='typing-dot'></span>
+                <span class='typing-dot'></span>
+            </div>
+        """, unsafe_allow_html=True)
+
+        try:
+            full_prompt = f"{SISTEM_PROMPTU}\n\nKullanıcı Sorusu: {prompt}"
+            response = st.session_state.chat_session.send_message(full_prompt, stream=True)
+
+            full_res = ""
+            for chunk in response:
+                full_res += chunk.text
+                placeholder.markdown(full_res + "▌")
+
+            placeholder.markdown(full_res)
+
+            if len(st.session_state.messages) == 1:
+                st.session_state.messages[0]["title"] = prompt[:25]
+
+            st.session_state.messages.append({"role": "assistant", "content": full_res})
+            db[st.session_state.current_chat_id] = st.session_state.messages
+            save_db(db)
+
+        except Exception as e:
+            placeholder.markdown("")
+            st.error("Bir hata oluştu. Lütfen API anahtarınızı kontrol edin.")
+
 # ==========================================
 # 7. SOL MENÜ (SIDEBAR)
 # ==========================================
@@ -407,6 +517,7 @@ with st.sidebar:
         st.session_state.current_chat_id = datetime.now().strftime("%Y%m%d_%H%M%S")
         st.session_state.messages = []
         st.session_state.chat_session = model.start_chat(history=[])
+        st.session_state.pending_prompt = None
         st.rerun()
 
     # Konuşma arama kutusu
@@ -418,10 +529,9 @@ with st.sidebar:
         key="search_input"
     )
 
-    # Geçmiş konuşmalar – gruplandırılmış
+    # ── Geçmiş konuşmalar – modernleştirilmiş ──
     t_db = db.copy()
 
-    # Arama filtresi
     if search_query:
         t_db = {
             cid: msgs for cid, msgs in t_db.items()
@@ -436,7 +546,10 @@ with st.sidebar:
         st.markdown(f"<div class='sb-label'>{group_name}</div>", unsafe_allow_html=True)
 
         for cid in cids:
+            is_active = cid == st.session_state.current_chat_id
+
             if st.session_state.edit_id == cid:
+                # Düzenleme modu
                 new_val = st.text_input(
                     "Düzenle",
                     value=t_db[cid][0].get("title", "Analiz"),
@@ -445,44 +558,55 @@ with st.sidebar:
                 )
                 col_s, col_c = st.columns(2)
                 with col_s:
-                    if st.button("✓", key=f"s_{cid}", use_container_width=True):
+                    if st.button("✓ Kaydet", key=f"s_{cid}", use_container_width=True):
                         t_db[cid][0]["title"] = new_val
                         save_db(t_db)
                         st.session_state.edit_id = None
                         st.rerun()
                 with col_c:
-                    if st.button("✕", key=f"c_{cid}", use_container_width=True):
+                    if st.button("✕ İptal", key=f"c_{cid}", use_container_width=True):
                         st.session_state.edit_id = None
                         st.rerun()
             else:
-                c1, c2, c3 = st.columns([0.75, 0.12, 0.13])
+                title = t_db[cid][0].get("title", t_db[cid][0]["content"][:22]) if t_db[cid] else "Analiz"
+                active_class = "active" if is_active else ""
+
+                # Modern history item satırı
+                c1, c2, c3 = st.columns([0.76, 0.12, 0.12])
                 with c1:
-                    title = t_db[cid][0].get("title", t_db[cid][0]["content"][:20])
-                    active_prefix = "▶ " if cid == st.session_state.current_chat_id else ""
-                    if st.button(active_prefix + title, key=f"ch_{cid}", use_container_width=True):
+                    # Görsel satır
+                    st.markdown(f"""
+                        <div class='history-item {active_class}'>
+                            <span class='history-icon'>{'◆' if is_active else '◇'}</span>
+                            <span class='history-text'>{title}</span>
+                        </div>
+                    """, unsafe_allow_html=True)
+                    # Tıklanabilir şeffaf buton
+                    if st.button("‎", key=f"ch_{cid}", use_container_width=True,
+                                 help=title):
                         st.session_state.current_chat_id = cid
                         st.session_state.messages = t_db[cid]
+                        st.session_state.pending_prompt = None
                         st.rerun()
                 with c2:
-                    if st.button("✎", key=f"e_{cid}"):
+                    if st.button("✎", key=f"e_{cid}", help="Yeniden adlandır"):
                         st.session_state.edit_id = cid
                         st.rerun()
                 with c3:
-                    if st.button("🗑️", key=f"d_{cid}"):
+                    if st.button("🗑", key=f"d_{cid}", help="Sil"):
                         del t_db[cid]
                         save_db(t_db)
+                        if cid == st.session_state.current_chat_id:
+                            st.session_state.messages = []
+                            st.session_state.current_chat_id = datetime.now().strftime("%Y%m%d_%H%M%S")
                         st.rerun()
 
-    # Kullanıcı profil satırı (en alt)
-    st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
+    # ── Proje sahibi bilgi kartı (en alt) ──
     st.markdown("""
-        <div class='user-profile'>
-            <div class='user-avatar'>MH</div>
-            <div>
-                <div class='user-name'>Merve Havuz</div>
-                <span class='user-plan'>Pro Plan</span>
-            </div>
-            <span class='settings-icon'>⚙️</span>
+        <div class='project-owner-card'>
+            <div class='project-owner-label'>Proje Sahibi</div>
+            <div class='project-owner-name'>Merve Havuz</div>
+            <div class='project-owner-sub'>Siber Hukuk Asistanı · Okul Projesi</div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -509,7 +633,7 @@ if st.session_state.messages:
         </div>
     """, unsafe_allow_html=True)
 
-# Boş ekran – hoşgeldin & öneri kartları
+# ── Boş ekran – hoşgeldin kartları & chip'ler ──
 if not st.session_state.messages:
     st.markdown('<h1 class="portal-title">⚖️ Siber Hukuk Portalı</h1>', unsafe_allow_html=True)
     st.markdown(
@@ -528,6 +652,7 @@ if not st.session_state.messages:
     col_a, col_b = st.columns(2)
     for idx, (icon, title, desc) in enumerate(welcome_items):
         with col_a if idx % 2 == 0 else col_b:
+            # Kartı HTML ile göster
             st.markdown(f"""
                 <div class='welcome-card'>
                     <span class='welcome-card-icon'>{icon}</span>
@@ -535,15 +660,33 @@ if not st.session_state.messages:
                     <div class='welcome-card-desc'>{desc}</div>
                 </div>
             """, unsafe_allow_html=True)
+            # Kartın altına şeffaf Streamlit butonu (tıklanabilirlik için)
+            if st.button(f"{icon} {title}", key=f"wcard_{idx}", use_container_width=True):
+                st.session_state.pending_prompt = desc
 
     st.markdown("<div style='height:0.8rem'></div>", unsafe_allow_html=True)
 
-# Mesajları göster + AI mesajlarına aksiyon butonları
+    # Chip butonları
+    st.markdown("<div class='chip-row'>", unsafe_allow_html=True)
+    ch1, ch2, ch3, ch4 = st.columns([0.28, 0.25, 0.25, 0.22])
+    chips = [
+        (ch1, "📄 Dilekçe oluştur",   "Siber suç için dilekçe oluşturmama yardım et."),
+        (ch2, "⏱ Başvuru süresi?",    "Siber suçlarda başvuru ve dava açma süreleri nedir?"),
+        (ch3, "💰 Ceza miktarı?",      "Siber suçlarda öngörülen ceza miktarları nedir?"),
+        (ch4, "🔍 Kanun maddeleri",    "Türkiye'de siber suçlarla ilgili kanun maddeleri nelerdir?"),
+    ]
+    for col, label, question in chips:
+        with col:
+            if st.button(label, key=f"chip_{label}"):
+                st.session_state.pending_prompt = question
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
+
+# ── Mevcut mesajları göster ──
 for i, msg in enumerate(st.session_state.messages):
     with st.chat_message(msg["role"], avatar="👤" if msg["role"] == "user" else "⚖️"):
         st.markdown(msg["content"])
 
-        # Yalnızca AI mesajlarına aksiyon butonları
         if msg["role"] == "assistant":
             st.markdown("<div style='height:3px'></div>", unsafe_allow_html=True)
             st.markdown("<div class='action-row'>", unsafe_allow_html=True)
@@ -575,63 +718,19 @@ for i, msg in enumerate(st.session_state.messages):
 # 9. SOHBET GİRDİSİ
 # ==========================================
 
-# Hızlı öneri chip'leri (yalnızca boş ekranda)
-if not st.session_state.messages:
-    st.markdown("<div class='chip-row'>", unsafe_allow_html=True)
-    ch1, ch2, ch3, ch4 = st.columns([0.28, 0.25, 0.25, 0.22])
-    chips = [
-        (ch1, "📄 Dilekçe oluştur"),
-        (ch2, "⏱ Başvuru süresi?"),
-        (ch3, "💰 Ceza miktarı?"),
-        (ch4, "🔍 Kanun maddeleri"),
-    ]
-    for col, label in chips:
-        with col:
-            st.button(label, key=f"chip_{label}")
-    st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
+# Kart / chip tıklamasından gelen pending prompt'u işle
+if st.session_state.pending_prompt:
+    prompt_to_send = st.session_state.pending_prompt
+    st.session_state.pending_prompt = None
+    send_message(prompt_to_send)
+    st.rerun()
 
-# Ana chat input  ← DOKUNULMUYOR (logic aynı)
+# Ana chat input
 if prompt := st.chat_input("Hukuki vakayı buraya yazın..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user", avatar="👤"):
-        st.markdown(prompt)
+    send_message(prompt)
+    st.rerun()
 
-    with st.chat_message("assistant", avatar="⚖️"):
-        placeholder = st.empty()
-        # Animasyonlu yükleme göstergesi
-        placeholder.markdown("""
-            <div style='display:flex; align-items:center; gap:8px;
-                        color:#94A3B8; font-size:0.85rem; padding:4px 0;'>
-                <span>⚖️ &nbsp;Analiz ediliyor</span>
-                <span class='typing-dot'></span>
-                <span class='typing-dot'></span>
-                <span class='typing-dot'></span>
-            </div>
-        """, unsafe_allow_html=True)
-
-        try:
-            full_prompt = f"{SISTEM_PROMPTU}\n\nKullanıcı Sorusu: {prompt}"
-            response = st.session_state.chat_session.send_message(full_prompt, stream=True)
-
-            full_res = ""
-            for chunk in response:
-                full_res += chunk.text
-                placeholder.markdown(full_res + "▌")
-
-            placeholder.markdown(full_res)
-
-            if len(st.session_state.messages) == 1:
-                st.session_state.messages[0]["title"] = prompt[:25]
-
-            st.session_state.messages.append({"role": "assistant", "content": full_res})
-            db[st.session_state.current_chat_id] = st.session_state.messages
-            save_db(db)
-
-        except Exception as e:
-            st.error("Bir hata oluştu. Lütfen API anahtarınızı kontrol edin.")
-
-# Yasal uyarı – sayfa en altı
+# Yasal uyarı
 st.markdown("""
     <div class='disclaimer'>
         ⚠️ Bu platform hukuki tavsiye niteliği taşımamaktadır.
