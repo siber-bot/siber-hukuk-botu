@@ -47,6 +47,7 @@ st.markdown("""
     [data-testid="stDeployButton"],
     .stAppDeployButton { display: none !important; }
 
+    /* Ana Arka Plan */
     .stApp { background-color: #F8FAFC !important; }
 
     /* ── FIX 1: Sidebar toggle butonunun tooltip'ini gizle ── */
@@ -91,6 +92,7 @@ st.markdown("""
         box-shadow: none !important;
     }
 
+    /* Ana Mor Butonlar */
     section[data-testid="stSidebar"] .stButton > button[kind="primary"],
     section[data-testid="stSidebar"] button[kind="primary"] {
         background-color: #534AB7 !important;
@@ -160,7 +162,6 @@ st.markdown("""
         color: #EF4444 !important;
     }
     
-    /* Yan menü ikon sütunları boşluğunu daralt */
     [data-testid="stSidebar"] [data-testid="column"] {
         padding: 0 2px !important;
     }
@@ -196,17 +197,36 @@ st.markdown("""
         color: #1E293B !important;
     }
 
+    /* ── ALT CHAT GİRDİ KISMI (TAMAMEN BEYAZ) ── */
+    /* Streamlit karanlık arka planları ezmek için */
+    [data-testid="stBottomBlockContainer"] {
+        background: #F8FAFC !important;
+    }
+    [data-testid="stBottom"] > div {
+        background-color: #F8FAFC !important;
+    }
+    div[data-testid="stChatInput"] {
+        background-color: #F8FAFC !important;
+        padding-bottom: 1rem !important;
+    }
+    [data-testid="stChatInput"] textarea {
+        background-color: #FFFFFF !important;
+        color: #1E293B !important;
+        border-radius: 12px !important;
+        border: 1px solid #E2E8F0 !important;
+        font-size: 0.875rem !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.02) !important;
+    }
+    [data-testid="stChatInput"] textarea:focus {
+        border-color: #534AB7 !important;
+        box-shadow: 0 0 0 1px #534AB7 !important;
+    }
     [data-testid="stChatInput"] button {
         background-color: #534AB7 !important;
         color: white !important;
         border-radius: 8px !important;
     }
     [data-testid="stChatInput"] button:hover { background-color: #4339A8 !important; }
-    [data-testid="stChatInput"] textarea {
-        border-radius: 12px !important;
-        border: 0.5px solid #E2E8F0 !important;
-        font-size: 0.875rem !important;
-    }
 
     .block-container {
         max-width: 860px !important;
@@ -231,11 +251,11 @@ st.markdown("""
 
     .action-row { margin-top: 6px; }
     .action-row .stButton > button {
-        background: #F8FAFC !important;
+        background: #FFFFFF !important;
         border: 0.5px solid #E2E8F0 !important;
         border-radius: 20px !important;
         font-size: 0.72rem !important;
-        color: #94A3B8 !important;
+        color: #64748B !important;
         padding: 3px 10px !important;
         height: 26px !important;
         min-height: 26px !important;
@@ -259,17 +279,18 @@ st.markdown("""
         margin-bottom: 0.3rem;
     }
 
+    /* ── ANA EKRAN KARTLARI (BEYAZ VE AYDINLIK) ── */
     .welcome-card {
-        background: #FFFFFF;
-        border: 0.5px solid #E2E8F0;
-        border-radius: 12px;
+        background: #FFFFFF !important;
+        border: 1px solid #E2E8F0 !important;
+        border-radius: 12px !important;
         padding: 14px 16px;
         margin-bottom: 2px;
         transition: border-color 0.15s, box-shadow 0.15s;
     }
     .welcome-card:hover {
-        border-color: #AFA9EC;
-        box-shadow: 0 2px 10px rgba(83,74,183,0.08);
+        border-color: #534AB7 !important;
+        box-shadow: 0 4px 12px rgba(83,74,183,0.08) !important;
     }
     .welcome-card-icon  { font-size: 1.1rem; margin-bottom: 6px; display: block; }
     .welcome-card-title { font-size: 0.85rem; font-weight: 600; color: #1E293B; }
@@ -287,18 +308,19 @@ st.markdown("""
     }
 
     .chip-wrap .stButton > button {
-        background: #F1F0FD !important;
+        background: #FFFFFF !important;
         color: #534AB7 !important;
-        border: 0.5px solid #C4C0F0 !important;
+        border: 1px solid #E2E8F0 !important;
         border-radius: 20px !important;
         font-size: 0.76rem !important;
         font-weight: 500 !important;
         padding: 6px 14px !important;
         white-space: nowrap !important;
         transition: all 0.15s !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;
     }
     .chip-wrap .stButton > button:hover {
-        background: #DDD9FC !important;
+        background: #EEEDFE !important;
         border-color: #7F77DD !important;
     }
 
@@ -327,7 +349,7 @@ st.markdown("""
     .sb-section-label {
         font-size: 0.59rem;
         font-weight: 700;
-        color: #C4C9D4;
+        color: #94A3B8;
         text-transform: uppercase;
         letter-spacing: 0.09em;
         padding: 12px 2px 4px;
@@ -337,8 +359,9 @@ st.markdown("""
         margin: 8px 0 14px 0;
         padding: 10px 12px;
         border-radius: 10px;
-        background: #F5F4FF;
-        border: 0.5px solid #DDD9FC;
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         display: flex;
         align-items: center;
         gap: 10px;
@@ -357,8 +380,8 @@ st.markdown("""
         letter-spacing: 0.5px;
     }
     .owner-info { flex: 1; min-width: 0; }
-    .owner-name { font-size: 0.81rem; font-weight: 600; color: #2D2A6E; line-height: 1.3; }
-    .owner-sub  { font-size: 0.64rem; color: #9491C8; margin-top: 1px; line-height: 1.4; }
+    .owner-name { font-size: 0.81rem; font-weight: 600; color: #1E293B; line-height: 1.3; }
+    .owner-sub  { font-size: 0.64rem; color: #64748B; margin-top: 1px; line-height: 1.4; }
 
     .disclaimer {
         text-align: center;
@@ -558,7 +581,6 @@ with st.sidebar:
                 title = (t_db[cid][0].get("title") or t_db[cid][0]["content"][:22]) if t_db[cid] else "Analiz"
                 active_cls = "history-btn-active" if is_active else "history-btn"
 
-                # Sütun oranları daha minimalist ikonlar için güncellendi
                 row_c, edit_c, del_c = st.columns([0.74, 0.13, 0.13], gap="small")
                 with row_c:
                     st.markdown(f"<div class='{active_cls}'>", unsafe_allow_html=True)
