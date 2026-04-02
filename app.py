@@ -33,7 +33,7 @@ def save_db(data):
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 # ==========================================
-# 3. ÖZEL CSS
+# 3. ÖZEL CSS (KARANLIK MOD ENGELLEYİCİ)
 # ==========================================
 st.markdown("""
 <style>
@@ -47,30 +47,33 @@ st.markdown("""
     [data-testid="stDeployButton"],
     .stAppDeployButton { display: none !important; }
 
+    /* ZORUNLU AYDINLIK MOD (Siyahlıkları yok et) */
     html, body, [class*="css"], .stApp, [data-testid="stAppViewContainer"] {
-        background-color: #F8FAFC !important;
+        background-color: #FFFFFF !important;
         color: #1E293B !important;
     }
 
+    /* ── FIX 1: Sidebar toggle butonunun tooltip'ini gizle ── */
     button[data-testid="baseButton-headerNoPadding"],
     [data-testid="collapsedControl"],
     button[title*="keyboard"],
     button[aria-label*="keyboard"],
     section[data-testid="stSidebar"] ~ div > button,
-    div[data-testid="stSidebarCollapsedControl"] { display: none !important; }
+    div[data-testid="stSidebarCollapsedControl"] {
+        display: none !important;
+    }
     button[kind="header"] { display: none !important; }
-    [data-testid="stSidebar"] > div:first-child > div > button { pointer-events: none !important; }
+    [data-testid="stSidebar"] > div:first-child > div > button {
+        pointer-events: none !important;
+    }
     .st-emotion-cache-dvne4q, .st-emotion-cache-1gulkj5, [class*="collapsedControl"] { display: none !important; }
 
     /* ── SIDEBAR ── */
-    section[data-testid="stSidebar"],
-    section[data-testid="stSidebar"] > div {
-        background-color: #FFFFFF !important;
-        border-right: 1px solid #E2E8F0 !important;
-        width: 260px !important;
-        min-width: 220px !important;
+    section[data-testid="stSidebar"], section[data-testid="stSidebar"] > div {
+        background-color: #FAFAFA !important;
+        border-right: 0.5px solid #E5E7EB !important;
     }
-
+    
     section[data-testid="stSidebar"] .stButton > button:not([kind="primary"]) {
         border: none !important;
         background: transparent !important;
@@ -82,38 +85,19 @@ st.markdown("""
         background-color: #534AB7 !important;
         border: 1px solid #534AB7 !important;
         border-radius: 8px !important;
-        font-weight: 600 !important;
+        font-weight: 500 !important;
         font-size: 0.85rem !important;
         color: #FFFFFF !important;
-        padding: 10px 16px !important;
-        letter-spacing: 0.01em !important;
     }
 
-    /* ── SIDEBAR SECTION LABELS ── */
-    .sb-section-label {
-        font-size: 0.6rem !important;
-        font-weight: 700 !important;
-        color: #94A3B8 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.08em !important;
-        padding: 16px 4px 6px !important;
-        border-top: 1px solid #F1F5F9 !important;
-        margin-top: 4px !important;
-        display: block !important;
-    }
-    .sb-section-label:first-child { border-top: none !important; margin-top: 0 !important; }
-
-    /* ── HISTORY ITEMS ── */
+    /* ── GEÇMİŞ İTEMLERİ ── */
     section[data-testid="stSidebar"] .history-btn > button {
         text-align: left !important;
-        font-size: 0.82rem !important;
-        font-weight: 400 !important;
-        color: #374151 !important;
-        border-radius: 7px !important;
-        padding: 8px 10px !important;
+        font-size: 0.8rem !important;
+        color: #4B5563 !important;
+        border-radius: 6px !important;
+        padding: 6px 10px !important;
         width: 100% !important;
-        line-height: 1.4 !important;
-        transition: background 0.1s ease !important;
     }
     section[data-testid="stSidebar"] .history-btn > button:hover {
         background: #F1F5F9 !important;
@@ -121,370 +105,115 @@ st.markdown("""
     }
     section[data-testid="stSidebar"] .history-btn-active > button {
         background: #EEEDFE !important;
-        color: #3730A3 !important;
+        color: #534AB7 !important;
         font-weight: 600 !important;
         border-left: 3px solid #534AB7 !important;
-        border-radius: 0 7px 7px 0 !important;
+        border-radius: 6px !important;
         padding-left: 10px !important;
     }
 
-    /* ── ICON BUTTONS (edit/delete) ── */
     section[data-testid="stSidebar"] .icon-btn > button {
-        width: 28px !important;
-        height: 28px !important;
-        min-height: 28px !important;
-        padding: 0 !important;
-        font-size: 0.85rem !important;
-        color: #64748B !important;
-        background: #F1F5F9 !important;
-        border: 1px solid #E2E8F0 !important;
-        border-radius: 6px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    section[data-testid="stSidebar"] .icon-btn > button:hover {
-        background: #E2E8F0 !important;
-        color: #1E293B !important;
-    }
-    section[data-testid="stSidebar"] .delete-btn > button:hover {
-        background: #FEE2E2 !important;
-        color: #DC2626 !important;
-        border-color: #FECACA !important;
+        width: 26px !important; height: 26px !important; min-height: 26px !important; padding: 0 !important;
+        color: #94A3B8 !important; background: transparent !important; border-radius: 6px !important;
     }
 
-    /* ── MESSAGE BUBBLES ── */
+    /* ── YENİ MESAJ BALONU TASARIMI (GARANTİLİ) ── */
     [data-testid="stChatMessage"] {
         background-color: transparent !important;
-        padding: 0.4rem 0 !important;
-        max-width: 100% !important;
+        padding: 0.5rem 0 !important;
     }
-
-    /* User message: right-aligned, max-width */
+    
+    /* Kullanıcı Mesajı */
     div[data-testid="stMarkdownContainer"]:has(.usr-msg) {
         background-color: #534AB7 !important;
         color: #FFFFFF !important;
-        border-radius: 16px 16px 4px 16px !important;
+        border-radius: 14px 14px 14px 4px !important;
         padding: 12px 18px !important;
         display: inline-block !important;
-        max-width: 72% !important;
-        margin-left: auto !important;
-        float: right !important;
-        line-height: 1.65 !important;
-        box-shadow: 0 1px 4px rgba(83,74,183,0.15) !important;
     }
     div[data-testid="stMarkdownContainer"]:has(.usr-msg) p,
     div[data-testid="stMarkdownContainer"]:has(.usr-msg) li {
         color: #FFFFFF !important;
-        line-height: 1.65 !important;
-        margin-bottom: 0.4em !important;
     }
 
-    /* Assistant message: left-aligned, max-width, white card */
+    /* Asistan Mesajı */
     div[data-testid="stMarkdownContainer"]:has(.ast-msg) {
         background-color: #FFFFFF !important;
         border: 1px solid #E2E8F0 !important;
-        border-radius: 4px 16px 16px 16px !important;
-        padding: 16px 22px !important;
+        border-radius: 4px 14px 14px 14px !important;
+        padding: 14px 20px !important;
         color: #1E293B !important;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
-        max-width: 84% !important;
-        line-height: 1.75 !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
     }
-    div[data-testid="stMarkdownContainer"]:has(.ast-msg) p {
-        color: #1E293B !important;
-        line-height: 1.75 !important;
-        margin-bottom: 0.75em !important;
-    }
-    div[data-testid="stMarkdownContainer"]:has(.ast-msg) li {
-        color: #334155 !important;
-        line-height: 1.75 !important;
-        margin-bottom: 0.45em !important;
-    }
+    div[data-testid="stMarkdownContainer"]:has(.ast-msg) p,
+    div[data-testid="stMarkdownContainer"]:has(.ast-msg) li,
     div[data-testid="stMarkdownContainer"]:has(.ast-msg) strong {
-        color: #0F172A !important;
-        font-weight: 600 !important;
-    }
-    div[data-testid="stMarkdownContainer"]:has(.ast-msg) h1,
-    div[data-testid="stMarkdownContainer"]:has(.ast-msg) h2,
-    div[data-testid="stMarkdownContainer"]:has(.ast-msg) h3 {
-        color: #0F172A !important;
-        font-weight: 700 !important;
-        margin-top: 1.1em !important;
-        margin-bottom: 0.5em !important;
-        border-bottom: 1px solid #F1F5F9 !important;
-        padding-bottom: 4px !important;
-    }
-    div[data-testid="stMarkdownContainer"]:has(.ast-msg) ul,
-    div[data-testid="stMarkdownContainer"]:has(.ast-msg) ol {
-        padding-left: 1.4em !important;
-        margin-bottom: 0.8em !important;
-    }
-    div[data-testid="stMarkdownContainer"]:has(.ast-msg) ul li::marker {
-        color: #534AB7 !important;
-    }
-    div[data-testid="stMarkdownContainer"]:has(.ast-msg) blockquote {
-        border-left: 3px solid #534AB7 !important;
-        padding-left: 12px !important;
-        color: #475569 !important;
-        margin: 0.8em 0 !important;
-        background: #F8FAFC !important;
-        border-radius: 0 6px 6px 0 !important;
-        padding: 8px 12px !important;
+        color: #1E293B !important;
     }
 
-    /* ── CHAT INPUT AREA ── */
-    [data-testid="stBottomBlockContainer"],
-    [data-testid="stBottom"],
+    /* ── ALT CHAT GİRDİ KISMI (SİYAHLIK KALDIRICI) ── */
+    [data-testid="stBottomBlockContainer"], 
+    [data-testid="stBottom"], 
     .stChatFloatingInputContainer {
-        background-color: #F8FAFC !important;
-        background: #F8FAFC !important;
-        padding-bottom: 1.5rem !important;
+        background-color: #FFFFFF !important;
+        background: #FFFFFF !important;
     }
     div[data-testid="stChatInput"] {
-        background-color: #F8FAFC !important;
+        background-color: #FFFFFF !important;
         padding-bottom: 1rem !important;
-        padding-top: 0.75rem !important;
     }
     [data-testid="stChatInput"] textarea {
-        background-color: #FFFFFF !important;
+        background-color: #F8FAFC !important;
         color: #1E293B !important;
         border-radius: 12px !important;
-        border: 1.5px solid #CBD5E1 !important;
-        padding: 12px 16px !important;
-        font-size: 0.9rem !important;
-        line-height: 1.6 !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
-        transition: border-color 0.15s ease !important;
-    }
-    [data-testid="stChatInput"] textarea::placeholder {
-        color: #94A3B8 !important;
-        font-style: italic !important;
-    }
-    [data-testid="stChatInput"] textarea:focus {
-        border-color: #534AB7 !important;
-        box-shadow: 0 0 0 3px rgba(83,74,183,0.12) !important;
-        outline: none !important;
+        border: 1px solid #E2E8F0 !important;
     }
     [data-testid="stChatInput"] button {
         background-color: #534AB7 !important;
         color: white !important;
-        border-radius: 8px !important;
-        width: 38px !important;
-        height: 38px !important;
-        border: none !important;
-        box-shadow: 0 2px 6px rgba(83,74,183,0.35) !important;
-    }
-    [data-testid="stChatInput"] button:hover {
-        background-color: #4338CA !important;
-        box-shadow: 0 3px 8px rgba(83,74,183,0.45) !important;
     }
 
-    /* ── LAYOUT & SPACING ── */
-    .block-container {
-        max-width: 820px !important;
-        padding-top: 1.25rem !important;
-        padding-bottom: 0 !important;
-        padding-left: 2rem !important;
-        padding-right: 2rem !important;
-    }
+    .block-container { max-width: 860px !important; padding-top: 1rem !important; padding-bottom: 0 !important; }
 
-    /* ── ACTION ROW BUTTONS ── */
-    .action-row { margin-top: 8px; }
-    .action-row .stButton > button {
-        background: #F8FAFC !important;
-        border: 1px solid #E2E8F0 !important;
-        border-radius: 20px !important;
-        font-size: 0.72rem !important;
-        color: #475569 !important;
-        padding: 4px 12px !important;
-        height: 28px !important;
-        min-height: 28px !important;
-        font-weight: 500 !important;
-    }
-    .action-row .stButton > button:hover {
-        background: #F1F5F9 !important;
-        color: #1E293B !important;
-        border-color: #CBD5E1 !important;
-    }
-
-    /* ── WELCOME SCREEN ── */
-    .portal-title {
-        text-align: center;
-        font-weight: 700;
-        font-size: 2rem;
-        color: #0F172A;
-        margin-bottom: 0.25rem;
-    }
-    .portal-subtitle {
-        text-align: center;
-        color: #475569;
-        margin-bottom: 2rem;
-        font-size: 0.92rem;
-        font-weight: 400;
-    }
-
-    .welcome-card {
-        background: #FFFFFF !important;
-        border: 1px solid #E2E8F0 !important;
-        border-radius: 12px !important;
-        padding: 16px 18px !important;
-        margin-bottom: 10px !important;
-        cursor: pointer !important;
-        transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
-    }
-    .welcome-card:hover {
-        border-color: #534AB7 !important;
-        box-shadow: 0 2px 8px rgba(83,74,183,0.1) !important;
-    }
-    .welcome-card-icon  { font-size: 1.2rem; margin-bottom: 8px; display: block; }
-    .welcome-card-title { font-size: 0.88rem; font-weight: 600; color: #0F172A; }
-    .welcome-card-desc  { font-size: 0.75rem; color: #475569; margin-top: 4px; line-height: 1.5; }
-
-    .card-trigger .stButton > button {
-        margin-top: -2px !important;
-        opacity: 0 !important;
-        height: 2px !important;
-        min-height: 2px !important;
-        width: 100% !important;
-        border: none !important;
-    }
-
-    .chip-wrap .stButton > button {
-        background: #FFFFFF !important;
-        color: #534AB7 !important;
-        border: 1.5px solid #C7D2FE !important;
-        border-radius: 20px !important;
-        padding: 7px 14px !important;
-        font-size: 0.78rem !important;
-        font-weight: 500 !important;
-    }
-    .chip-wrap .stButton > button:hover {
-        background: #EEEDFE !important;
-        border-color: #534AB7 !important;
-    }
-
-    /* ── TOPBAR ── */
-    .topbar {
-        display: flex;
-        align-items: center;
-        padding: 10px 0 14px;
-        border-bottom: 1px solid #E2E8F0;
-        margin-bottom: 10px;
-    }
-    .status-dot {
-        width: 8px;
-        height: 8px;
-        background: #10B981;
-        border-radius: 50%;
-        margin-right: 10px;
-        flex-shrink: 0;
-        box-shadow: 0 0 0 2px rgba(16,185,129,0.2);
-    }
-    .topbar-title {
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #1E293B;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    /* ── OWNER CARD ── */
-    .owner-card {
-        margin: 4px 0 16px 0;
-        padding: 12px 14px;
-        border-radius: 10px;
-        background: #F8FAFC;
-        border: 1px solid #E2E8F0;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .owner-avatar {
-        width: 34px;
-        height: 34px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #534AB7 0%, #7C3AED 100%);
-        color: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.72rem;
-        font-weight: 700;
-        flex-shrink: 0;
-    }
-    .owner-info { flex: 1; min-width: 0; }
-    .owner-name { font-size: 0.83rem; font-weight: 600; color: #1E293B; }
-    .owner-sub  { font-size: 0.65rem; color: #64748B; margin-top: 1px; }
-
-    /* ── AVATAR ── */
-    [data-testid="stChatMessage"] [data-testid="chatAvatarIcon-user"] {
-        background: linear-gradient(135deg, #534AB7 0%, #7C3AED 100%) !important;
-        border-radius: 50% !important;
-        color: white !important;
-        font-size: 0.8rem !important;
-    }
-    [data-testid="stChatMessage"] [data-testid="chatAvatarIcon-assistant"] {
-        background: #F1F5F9 !important;
-        border: 1.5px solid #E2E8F0 !important;
-        border-radius: 50% !important;
-        font-size: 0.8rem !important;
-    }
-
-    /* ── DISCLAIMER ── */
-    .disclaimer {
-        text-align: center;
-        font-size: 0.7rem;
-        color: #64748B;
-        margin-top: 8px;
-        padding: 0 1rem;
-        line-height: 1.5;
-    }
-
-    /* ── SCROLLING & LONG MESSAGE PADDING ── */
-    #scroll-bottom { height: 1px; }
-    [data-testid="stChatMessage"] + [data-testid="stChatMessage"] { margin-top: 4px !important; }
-
-    /* ── LEGAL SECTION FORMATTING ── */
-    .legal-section {
-        background: #F8FAFC;
-        border: 1px solid #E2E8F0;
-        border-radius: 8px;
-        padding: 14px 18px;
-        margin: 12px 0;
-    }
-    .legal-section-title {
-        font-size: 0.82rem;
-        font-weight: 700;
-        color: #3730A3;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 8px;
-    }
-
-    /* Responsive sidebar on small screens */
-    @media (max-width: 768px) {
-        section[data-testid="stSidebar"],
-        section[data-testid="stSidebar"] > div {
-            width: 200px !important;
-            min-width: 180px !important;
-        }
-        .block-container {
-            padding-left: 1rem !important;
-            padding-right: 1rem !important;
-        }
-        div[data-testid="stMarkdownContainer"]:has(.usr-msg),
-        div[data-testid="stMarkdownContainer"]:has(.ast-msg) {
-            max-width: 92% !important;
-        }
-    }
-
+    /* Diğer Araçlar */
     .typing-dot {
-        display: inline-block; width: 6px; height: 6px; background: #94A3B8; border-radius: 50%;
+        display: inline-block; width: 7px; height: 7px; background: #94A3B8; border-radius: 50%;
         margin: 0 2px; animation: typing-bounce 1.2s ease-in-out infinite;
     }
-    @keyframes typing-bounce { 0%, 80%, 100% { opacity: 0.25; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-4px); } }
+    @keyframes typing-bounce { 0%, 80%, 100% { opacity: 0.25; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-5px); } }
+
+    .action-row { margin-top: 6px; }
+    .action-row .stButton > button {
+        background: #FFFFFF !important; border: 0.5px solid #E2E8F0 !important; border-radius: 20px !important;
+        font-size: 0.72rem !important; color: #64748B !important; padding: 3px 10px !important; height: 26px !important;
+        min-height: 26px !important;
+    }
+
+    .portal-title { text-align: center; font-weight: 700; font-size: 2.2rem; color: #0F172A; margin-bottom: 0.3rem; }
+
+    /* Ana Ekran Kartları */
+    .welcome-card { background: #FFFFFF !important; border: 1px solid #E2E8F0 !important; border-radius: 12px !important; padding: 14px 16px; margin-bottom: 2px; }
+    .welcome-card-icon  { font-size: 1.1rem; margin-bottom: 6px; display: block; }
+    .welcome-card-title { font-size: 0.85rem; font-weight: 600; color: #1E293B; }
+    .welcome-card-desc  { font-size: 0.73rem; color: #64748B; margin-top: 3px; }
+
+    .card-trigger .stButton > button { margin-top: -2px !important; opacity: 0 !important; height: 2px !important; min-height: 2px !important; width: 100% !important; border: none !important; }
+
+    .chip-wrap .stButton > button { background: #FFFFFF !important; color: #534AB7 !important; border: 1px solid #E2E8F0 !important; border-radius: 20px !important; padding: 6px 14px !important; }
+
+    .topbar { display: flex; align-items: center; padding: 8px 0 14px; border-bottom: 0.5px solid #E2E8F0; margin-bottom: 6px; }
+    .status-dot { width: 7px; height: 7px; background: #1D9E75; border-radius: 50%; margin-right: 8px; }
+    .topbar-title { font-size: 0.88rem; font-weight: 500; color: #1E293B; }
+
+    .sb-section-label { font-size: 0.59rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; padding: 12px 2px 4px; }
+    .owner-card { margin: 8px 0 14px 0; padding: 10px 12px; border-radius: 10px; background: #FFFFFF; border: 1px solid #E2E8F0; display: flex; align-items: center; gap: 10px; }
+    .owner-avatar { width: 32px; height: 32px; border-radius: 50%; background: #534AB7; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; }
+    .owner-info { flex: 1; min-width: 0; }
+    .owner-name { font-size: 0.81rem; font-weight: 600; color: #1E293B; }
+    .owner-sub  { font-size: 0.64rem; color: #64748B; }
+
+    .disclaimer { text-align: center; font-size: 0.7rem; color: #94A3B8; margin-top: 6px; }
+    #scroll-bottom { height: 1px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -570,8 +299,9 @@ with st.sidebar:
         st.session_state.scroll_to_bottom = False
         st.rerun()
 
-    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
 
+    # Arama çubuğu kaldırıldı, direkt geçmiş yükleniyor
     t_db = load_db()
     grouped = group_chats_by_date(t_db)
 
@@ -584,12 +314,7 @@ with st.sidebar:
             is_active = cid == st.session_state.current_chat_id
 
             if st.session_state.edit_id == cid:
-                new_val = st.text_input(
-                    "Düzenle",
-                    value=(t_db[cid][0].get("title") or "Analiz") if t_db[cid] else "Analiz",
-                    key=f"r_{cid}",
-                    label_visibility="collapsed"
-                )
+                new_val = st.text_input("Düzenle", value=(t_db[cid][0].get("title") or "Analiz") if t_db[cid] else "Analiz", key=f"r_{cid}", label_visibility="collapsed")
                 cs, cc = st.columns(2)
                 with cs:
                     if st.button("✓ Kaydet", key=f"s_{cid}", use_container_width=True):
@@ -602,15 +327,16 @@ with st.sidebar:
                         st.session_state.edit_id = None
                         st.rerun()
             else:
-                title = (t_db[cid][0].get("title") or t_db[cid][0]["content"][:24]) if t_db[cid] else "Analiz"
+                title = (t_db[cid][0].get("title") or t_db[cid][0]["content"][:22]) if t_db[cid] else "Analiz"
                 active_cls = "history-btn-active" if is_active else "history-btn"
 
-                row_c, edit_c, del_c = st.columns([0.70, 0.15, 0.15], gap="small")
+                row_c, edit_c, del_c = st.columns([0.74, 0.13, 0.13], gap="small")
                 with row_c:
                     st.markdown(f"<div class='{active_cls}'>", unsafe_allow_html=True)
                     if st.button(title, key=f"ch_{cid}", use_container_width=True):
                         st.session_state.current_chat_id = cid
                         st.session_state.messages = t_db[cid]
+                        
                         history_for_ai = []
                         for m in t_db[cid]:
                             r = "user" if m["role"] == "user" else "model"
@@ -644,10 +370,11 @@ with st.sidebar:
 chat_active = bool(st.session_state.messages) or bool(st.session_state.queued_prompt)
 
 if chat_active:
+    # --- Üst Başlık (Paylaş/Dışa Aktar kaldırıldı) ---
     if st.session_state.messages:
-        current_title = st.session_state.messages[0].get("title", st.session_state.messages[0]["content"][:40] + "…")
+        current_title = st.session_state.messages[0].get("title", st.session_state.messages[0]["content"][:35] + "…")
     else:
-        current_title = st.session_state.queued_prompt[:40] + "…"
+        current_title = st.session_state.queued_prompt[:35] + "…"
 
     st.markdown(f"""
         <div class='topbar'>
@@ -659,11 +386,12 @@ if chat_active:
     # --- Geçmiş Mesajları Çizdir ---
     for i, msg in enumerate(st.session_state.messages):
         with st.chat_message(msg["role"], avatar="👤" if msg["role"] == "user" else "⚖️"):
+            # CSS etiketleriyle garantili renk ataması
             marker = "<div class='usr-msg'></div>" if msg["role"] == "user" else "<div class='ast-msg'></div>"
             st.markdown(marker + msg["content"], unsafe_allow_html=True)
 
             if msg["role"] == "assistant":
-                st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
+                st.markdown("<div style='height:3px'></div>", unsafe_allow_html=True)
                 st.markdown("<div class='action-row'>", unsafe_allow_html=True)
                 ac1, ac2, ac3, ac4, _gap = st.columns([0.15, 0.09, 0.09, 0.13, 0.54])
                 with ac1:
@@ -684,17 +412,19 @@ if chat_active:
     # --- YENİ PROMPT GELDİYSE AI'I ÇALIŞTIR ---
     if st.session_state.queued_prompt:
         prompt = st.session_state.queued_prompt
-        st.session_state.queued_prompt = ""
-
+        st.session_state.queued_prompt = ""  # Tekrar çalışmayı önlemek için temizle
+        
+        # 1. Kullanıcı mesajını çizdir
         with st.chat_message("user", avatar="👤"):
             st.markdown("<div class='usr-msg'></div>" + prompt, unsafe_allow_html=True)
-
+        
         st.session_state.messages.append({"role": "user", "content": prompt})
 
+        # 2. Asistan Yanıtını Oluştur ve Canlı Akıt (Stream)
         with st.chat_message("assistant", avatar="⚖️"):
             placeholder = st.empty()
             placeholder.markdown("<div class='ast-msg'></div>" + """
-                <div style='display:flex;align-items:center;gap:8px;color:#64748B;font-size:0.85rem;padding:4px 0;'>
+                <div style='display:flex;align-items:center;gap:8px;color:#94A3B8;font-size:0.85rem;padding:4px 0;'>
                     <span>⚖️ &nbsp;Analiz ediliyor</span>
                     <span class='typing-dot'></span><span class='typing-dot'></span><span class='typing-dot'></span>
                 </div>
@@ -706,12 +436,13 @@ if chat_active:
                 full_res = ""
                 for chunk in response:
                     full_res += chunk.text
+                    # Canlı akarken de doğru rengi alsın diye div'i başa ekliyoruz
                     placeholder.markdown("<div class='ast-msg'></div>" + full_res + "▌", unsafe_allow_html=True)
-
+                
                 placeholder.markdown("<div class='ast-msg'></div>" + full_res, unsafe_allow_html=True)
 
                 if len(st.session_state.messages) == 1:
-                    st.session_state.messages[0]["title"] = prompt[:28]
+                    st.session_state.messages[0]["title"] = prompt[:25]
 
                 st.session_state.messages.append({"role": "assistant", "content": full_res})
                 fresh_db = load_db()
@@ -723,7 +454,8 @@ if chat_active:
                 placeholder.markdown("")
                 st.error(f"⚠️ API Hatası Detayı: {e}")
                 st.session_state.messages.pop()
-
+        
+        # 3. Butonların vb. belirmesi için sayfayı yeniden yükle
         st.rerun()
 
     st.markdown("<div id='scroll-bottom'></div>", unsafe_allow_html=True)
@@ -732,18 +464,18 @@ if chat_active:
         st.session_state.scroll_to_bottom = False
 
 else:
-    # --- HOŞ GELDİNİZ EKRANI ---
+    # --- İLK GİRİŞ / HOŞ GELDİNİZ EKRANI ---
     st.markdown('<h1 class="portal-title">⚖️ Siber Hukuk Portalı</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="portal-subtitle">Hukuki vakayı veya dijital haklarınızı yazın — Türkiye mevzuatına göre analiz edelim.</p>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align:center;color:#64748B;margin-bottom:1.5rem;font-size:0.9rem;">Hukuki vakayı veya dijital haklarınızı yazın.</p>', unsafe_allow_html=True)
 
     welcome_items = [
-        ("🔒", "KVKK İhlali",        "Kişisel veri ihlali durumunda ne yapmalıyım?"),
-        ("💻", "Siber Saldırı",       "Sisteme izinsiz erişimde hukuki adımlar nelerdir?"),
-        ("📱", "Sosyal Medya Hukuku", "İnternette hakaret ve iftira davası nasıl açılır?"),
-        ("🏛️", "Şikayet Dilekçesi",  "BTK'ya şikayet dilekçesi nasıl hazırlanır?"),
+        ("🔒", "KVKK İhlali",         "Kişisel veri ihlali durumunda ne yapmalıyım?"),
+        ("💻", "Siber Saldırı",        "Sisteme izinsiz erişimde hukuki adımlar nelerdir?"),
+        ("📱", "Sosyal Medya Hukuku",  "İnternette hakaret ve iftira davası nasıl açılır?"),
+        ("🏛️", "Şikayet Dilekçesi",   "BTK'ya şikayet dilekçesi nasıl hazırlanır?"),
     ]
 
-    col_a, col_b = st.columns(2, gap="medium")
+    col_a, col_b = st.columns(2)
     for idx, (icon, title, desc) in enumerate(welcome_items):
         col = col_a if idx % 2 == 0 else col_b
         with col:
@@ -757,16 +489,16 @@ else:
             st.markdown("<div class='card-trigger'>", unsafe_allow_html=True)
             if st.button(f"▸ {title}", key=f"wcard_{idx}"):
                 st.session_state.queued_prompt = desc
-                st.rerun()
+                st.rerun() # Tıklanınca direk chat ekranına geçer
             st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("<div style='height:0.75rem'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
 
     chips = [
-        ("📄 Dilekçe oluştur", "Siber suç için resmi dilekçe oluşturmama yardım et."),
-        ("⏱ Başvuru süresi?",  "Siber suçlarda başvuru ve dava açma süreleri nedir?"),
-        ("💰 Ceza miktarı?",   "Siber suçlarda öngörülen ceza miktarları nedir?"),
-        ("🔍 Kanun maddeleri", "Türkiye'de siber suçlarla ilgili kanun maddeleri nelerdir?"),
+        ("📄 Dilekçe oluştur",  "Siber suç için resmi dilekçe oluşturmama yardım et."),
+        ("⏱ Başvuru süresi?",   "Siber suçlarda başvuru ve dava açma süreleri nedir?"),
+        ("💰 Ceza miktarı?",    "Siber suçlarda öngörülen ceza miktarları nedir?"),
+        ("🔍 Kanun maddeleri",  "Türkiye'de siber suçlarla ilgili kanun maddeleri nelerdir?"),
     ]
     st.markdown("<div class='chip-wrap'>", unsafe_allow_html=True)
     chip_cols = st.columns(len(chips))
@@ -776,18 +508,18 @@ else:
                 st.session_state.queued_prompt = question
                 st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
+
 
 # ==========================================
 # 9. SOHBET GİRDİSİ (Alt Çubuk)
 # ==========================================
-if prompt := st.chat_input("Hukuki vakayı veya sorunuzu buraya yazın…"):
+if prompt := st.chat_input("Hukuki vakayı buraya yazın..."):
     st.session_state.queued_prompt = prompt
-    st.rerun()
+    st.rerun() # Tetiklendiği an sayfayı yeniler ve üstteki chat alanına geçirir
 
 st.markdown("""
     <div class='disclaimer'>
-        ⚠️ Bu platform hukuki tavsiye niteliği taşımamaktadır. Bilgiler yalnızca genel rehberlik amaçlıdır.
-        Hukuki süreçler için bir avukata danışmanız önerilir.
+        ⚠️ Bu platform hukuki tavsiye niteliği taşımamaktadır. Bilgiler yalnızca genel rehberlik amaçlıdır. Hukuki süreçler için bir avukana danışmanız önerilir.
     </div>
 """, unsafe_allow_html=True)
