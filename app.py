@@ -4,454 +4,569 @@ import json
 import os
 from datetime import datetime
 
-# ==========================================
-# 1. SAYFA AYARLARI
-# ==========================================
+# ─────────────────────────────────────────
+# SAYFA AYARI
+# ─────────────────────────────────────────
 st.set_page_config(
     page_title="Siber Hukuk Asistanı",
     page_icon="⚖️",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed",
 )
 
-# ==========================================
-# 2. VERİTABANI YÖNETİMİ
-# ==========================================
+# ─────────────────────────────────────────
+# VERİTABANI
+# ─────────────────────────────────────────
 DB_FILE = "chat_history.json"
 
-def load_db():
+def load_db() -> dict:
     if os.path.exists(DB_FILE):
         try:
             with open(DB_FILE, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except:
-            return {}
+        except Exception:
+            pass
     return {}
 
-def save_db(data):
+def save_db(data: dict) -> None:
     with open(DB_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
+        json.dump(data, f, ensure_ascii=False, indent=2)
 
-# ==========================================
-# 3. ÖZEL CSS
-# ==========================================
-st.markdown("""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap');
-    * { font-family: 'DM Sans', sans-serif !important; }
+def save_current() -> None:
+    db = load_db()
+    db[st.session_state.chat_id] = st.session_state.messages
+    save_db(db)
 
-    header[data-testid="stHeader"],
-    [data-testid="stToolbar"],
-    footer,
-    [data-testid="stStatusWidget"],
-    [data-testid="stDeployButton"],
-    .stAppDeployButton { display: none !important; }
-
-    html, body, [class*="css"], .stApp, [data-testid="stAppViewContainer"] {
-        background-color: #FFFFFF !important;
-        color: #1E293B !important;
-    }
-
-    /* Hide sidebar toggle buttons */
-    button[data-testid="baseButton-headerNoPadding"],
-    [data-testid="collapsedControl"],
-    button[title*="keyboard"],
-    button[aria-label*="keyboard"],
-    section[data-testid="stSidebar"] ~ div > button,
-    div[data-testid="stSidebarCollapsedControl"] {
-        display: none !important;
-    }
-    button[kind="header"] { display: none !important; }
-    .st-emotion-cache-dvne4q, .st-emotion-cache-1gulkj5, [class*="collapsedControl"] { display: none !important; }
-
-    /* ── SIDEBAR ── */
-    section[data-testid="stSidebar"] {
-        width: 260px !important;
-        min-width: 260px !important;
-        max-width: 260px !important;
-    }
-    section[data-testid="stSidebar"] > div:first-child {
-        width: 260px !important;
-        background-color: #FAFAFA !important;
-        border-right: 0.5px solid #E5E7EB !important;
-        padding-top: 1rem !important;
-    }
-
-    section[data-testid="stSidebar"] .stButton > button:not([kind="primary"]) {
-        border: none !important;
-        background: transparent !important;
-        box-shadow: none !important;
-    }
-
-    section[data-testid="stSidebar"] .stButton > button[kind="primary"],
-    section[data-testid="stSidebar"] button[kind="primary"] {
-        background-color: #534AB7 !important;
-        border: 1px solid #534AB7 !important;
-        border-radius: 8px !important;
-        font-weight: 500 !important;
-        font-size: 0.85rem !important;
-        color: #FFFFFF !important;
-    }
-
-    /* ── GEÇMİŞ İTEMLERİ ── */
-    .history-btn > button {
-        text-align: left !important;
-        font-size: 0.8rem !important;
-        color: #4B5563 !important;
-        border-radius: 6px !important;
-        padding: 6px 10px !important;
-        width: 100% !important;
-        border: none !important;
-        background: transparent !important;
-    }
-    .history-btn > button:hover {
-        background: #F1F5F9 !important;
-        color: #1E293B !important;
-    }
-    .history-btn-active > button {
-        background: #EEEDFE !important;
-        color: #534AB7 !important;
-        font-weight: 600 !important;
-        border-left: 3px solid #534AB7 !important;
-        border-radius: 6px !important;
-        padding-left: 10px !important;
-    }
-
-    /* ── MESAJ BALONLARI ── */
-    [data-testid="stChatMessage"] {
-        background-color: transparent !important;
-        padding: 0.5rem 0 !important;
-    }
-
-    div[data-testid="stMarkdownContainer"]:has(.usr-msg) {
-        background-color: #534AB7 !important;
-        color: #FFFFFF !important;
-        border-radius: 14px 14px 14px 4px !important;
-        padding: 12px 18px !important;
-        display: inline-block !important;
-    }
-    div[data-testid="stMarkdownContainer"]:has(.usr-msg) p,
-    div[data-testid="stMarkdownContainer"]:has(.usr-msg) li {
-        color: #FFFFFF !important;
-    }
-
-    div[data-testid="stMarkdownContainer"]:has(.ast-msg) {
-        background-color: #FFFFFF !important;
-        border: 1px solid #E2E8F0 !important;
-        border-radius: 4px 14px 14px 14px !important;
-        padding: 14px 20px !important;
-        color: #1E293B !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
-    }
-    div[data-testid="stMarkdownContainer"]:has(.ast-msg) p,
-    div[data-testid="stMarkdownContainer"]:has(.ast-msg) li,
-    div[data-testid="stMarkdownContainer"]:has(.ast-msg) strong {
-        color: #1E293B !important;
-    }
-
-    /* ── INPUT AREA ── */
-    [data-testid="stBottomBlockContainer"],
-    [data-testid="stBottom"],
-    .stChatFloatingInputContainer {
-        background-color: #FFFFFF !important;
-        background: #FFFFFF !important;
-    }
-    div[data-testid="stChatInput"] {
-        background-color: #FFFFFF !important;
-        padding-bottom: 1rem !important;
-    }
-    [data-testid="stChatInput"] textarea {
-        background-color: #F8FAFC !important;
-        color: #1E293B !important;
-        border-radius: 12px !important;
-        border: 1px solid #E2E8F0 !important;
-    }
-    [data-testid="stChatInput"] button {
-        background-color: #534AB7 !important;
-        color: white !important;
-    }
-
-    .block-container { max-width: 860px !important; padding-top: 1rem !important; padding-bottom: 0 !important; }
-
-    /* ── WELCOME CARDS (compact) ── */
-    .welcome-card {
-        background: #FFFFFF !important;
-        border: 1px solid #E2E8F0 !important;
-        border-radius: 10px !important;
-        padding: 8px 12px !important;
-        margin-bottom: 4px !important;
-    }
-    .welcome-card-icon  { font-size: 1rem; margin-bottom: 2px; display: block; }
-    .welcome-card-title { font-size: 0.82rem; font-weight: 600; color: #1E293B; line-height: 1.3; }
-    .welcome-card-desc  { font-size: 0.71rem; color: #64748B; margin-top: 2px; line-height: 1.4; overflow: visible; }
-
-    .card-trigger .stButton > button {
-        margin-top: -2px !important;
-        opacity: 0 !important;
-        height: 2px !important;
-        min-height: 2px !important;
-        width: 100% !important;
-        border: none !important;
-    }
-
-    .chip-wrap .stButton > button {
-        background: #FFFFFF !important;
-        color: #534AB7 !important;
-        border: 1px solid #E2E8F0 !important;
-        border-radius: 20px !important;
-        padding: 6px 14px !important;
-    }
-
-    .portal-title { text-align: center; font-weight: 700; font-size: 2rem; color: #0F172A; margin-bottom: 0.2rem; }
-
-    .topbar { display: flex; align-items: center; padding: 8px 0 14px; border-bottom: 0.5px solid #E2E8F0; margin-bottom: 6px; }
-    .status-dot { width: 7px; height: 7px; background: #1D9E75; border-radius: 50%; margin-right: 8px; }
-    .topbar-title { font-size: 0.88rem; font-weight: 500; color: #1E293B; }
-
-    .sb-section-label { font-size: 0.59rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; padding: 10px 2px 3px; }
-
-    .disclaimer { text-align: center; font-size: 0.7rem; color: #94A3B8; margin-top: 6px; }
-    #scroll-bottom { height: 1px; }
-
-    /* Sidebar header styles */
-    .sb-header { padding: 0 4px 12px 4px; }
-    .sb-project-label { font-size: 0.65rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
-    .sb-bot-name { font-size: 1rem; font-weight: 700; color: #1E293B; margin-bottom: 10px; }
-    .sb-owner { font-size: 0.75rem; color: #64748B; margin-bottom: 14px; }
-    .sb-owner span { font-weight: 600; color: #1E293B; }
-</style>
-""", unsafe_allow_html=True)
-
-# ==========================================
-# 4. API VE MODEL
-# ==========================================
-SISTEM_PROMPTU = "Sen uzman bir Siber Hukuk Asistanısın. Yanıtlarını resmi, madde işaretli ve Türkiye yasalarına dayandırarak ver."
+# ─────────────────────────────────────────
+# API & MODEL
+# ─────────────────────────────────────────
+SYSTEM_PROMPT = (
+    "Sen uzman bir Siber Hukuk Asistanısın. "
+    "Yanıtlarını resmi, maddeli ve Türkiye yasalarına (TCK, KVKK, 5651 sayılı Kanun vb.) "
+    "dayandırarak ver. Gerektiğinde ilgili kanun maddelerini belirt. "
+    "Yanıtların net, anlaşılır ve uygulanabilir olsun."
+)
 
 try:
-    API_KEY = st.secrets["GEMINI_API_KEY"]
-    genai.configure(api_key=API_KEY)
-    model = genai.GenerativeModel('gemini-3-flash-preview')
+    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+    _model = genai.GenerativeModel("gemini-2.0-flash")
 except Exception as e:
-    st.error("API Hatası! Lütfen Streamlit ayarlarını kontrol edin.")
+    st.error(f"API Hatası: {e}")
     st.stop()
 
-# ==========================================
-# 5. SESSION STATE
-# ==========================================
-db = load_db()
-
-if "current_chat_id" not in st.session_state:
-    st.session_state.current_chat_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+# ─────────────────────────────────────────
+# SESSION STATE
+# ─────────────────────────────────────────
+if "chat_id" not in st.session_state:
+    st.session_state.chat_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 if "messages" not in st.session_state:
-    st.session_state.messages = db.get(st.session_state.current_chat_id, [])
-if "chat_session" not in st.session_state:
-    st.session_state.chat_session = model.start_chat(history=[])
-if "queued_prompt" not in st.session_state:
-    st.session_state.queued_prompt = ""
-if "scroll_to_bottom" not in st.session_state:
-    st.session_state.scroll_to_bottom = False
+    db0 = load_db()
+    st.session_state.messages = db0.get(st.session_state.chat_id, [])
+if "gem_session" not in st.session_state:
+    history = [
+        {"role": "user" if m["role"] == "user" else "model", "parts": [m["content"]]}
+        for m in st.session_state.messages
+    ]
+    st.session_state.gem_session = _model.start_chat(history=history)
+if "queued" not in st.session_state:
+    st.session_state.queued = ""
 
-# ==========================================
-# 6. YARDIMCI FONKSİYONLAR
-# ==========================================
-def group_chats_by_date(chat_dict):
-    today = datetime.now().date()
-    groups = {"Bugün": [], "Bu Hafta": [], "Geçen Hafta": [], "Eskiler": []}
-    for cid in sorted(chat_dict.keys(), reverse=True):
+# ─────────────────────────────────────────
+# YARDIMCILAR
+# ─────────────────────────────────────────
+def stream_response(prompt: str, placeholder) -> str:
+    full_prompt = f"{SYSTEM_PROMPT}\n\nKullanıcı: {prompt}"
+    response = st.session_state.gem_session.send_message(full_prompt, stream=True)
+    text = ""
+    for chunk in response:
+        text += chunk.text
+        placeholder.markdown(text + "▌")
+    placeholder.markdown(text)
+    return text
+
+def process_message(user_text: str) -> None:
+    with st.chat_message("user", avatar="👤"):
+        st.markdown(user_text)
+    st.session_state.messages.append({"role": "user", "content": user_text})
+    with st.chat_message("assistant", avatar="⚖️"):
+        ph = st.empty()
         try:
-            d = datetime.strptime(cid, "%Y%m%d_%H%M%S").date()
-            diff = (today - d).days
-            if diff == 0:      groups["Bugün"].append(cid)
-            elif diff <= 7:    groups["Bu Hafta"].append(cid)
-            elif diff <= 14:   groups["Geçen Hafta"].append(cid)
-            else:              groups["Eskiler"].append(cid)
-        except:
+            answer = stream_response(user_text, ph)
+            st.session_state.messages.append({"role": "assistant", "content": answer})
+            if len(st.session_state.messages) == 2:
+                st.session_state.messages[0]["title"] = user_text[:30]
+            save_current()
+        except Exception as err:
+            ph.error(f"⚠️ Hata: {err}")
+            st.session_state.messages.pop()
+
+def load_chat(cid: str) -> None:
+    db = load_db()
+    msgs = db.get(cid, [])
+    st.session_state.chat_id = cid
+    st.session_state.messages = msgs
+    st.session_state.gem_session = _model.start_chat(history=[
+        {"role": "user" if m["role"] == "user" else "model", "parts": [m["content"]]}
+        for m in msgs
+    ])
+    st.session_state.queued = ""
+
+def new_chat() -> None:
+    st.session_state.chat_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+    st.session_state.messages = []
+    st.session_state.gem_session = _model.start_chat(history=[])
+    st.session_state.queued = ""
+
+def group_by_date(db: dict) -> dict:
+    today = datetime.now().date()
+    groups: dict = {"Bugün": [], "Bu Hafta": [], "Geçen Hafta": [], "Eskiler": []}
+    for cid in sorted(db.keys(), reverse=True):
+        try:
+            diff = (today - datetime.strptime(cid, "%Y%m%d_%H%M%S").date()).days
+            if   diff == 0:  groups["Bugün"].append(cid)
+            elif diff <= 7:  groups["Bu Hafta"].append(cid)
+            elif diff <= 14: groups["Geçen Hafta"].append(cid)
+            else:            groups["Eskiler"].append(cid)
+        except Exception:
             groups["Eskiler"].append(cid)
     return groups
 
-def scroll_to_bottom():
-    st.markdown("""
-        <script>
-            window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
-            setTimeout(() => window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'}), 300);
-        </script>
-    """, unsafe_allow_html=True)
+# ─────────────────────────────────────────
+# URL PARAM → AKSİYON
+# ─────────────────────────────────────────
+params    = st.query_params
+sb_action = params.get("sb_action", None)
+sb_cid    = params.get("sb_cid", None)
 
-# ==========================================
-# 7. SOL MENÜ (SIDEBAR)
-# ==========================================
-with st.sidebar:
-    st.markdown("""
-        <div class='sb-header'>
-            <div class='sb-project-label'>Bilişim Güvenliği Teknolojisi Bitirme Projesi</div>
-            <div class='sb-bot-name'>⚖️ Siber Hukuk Botu</div>
-            <div class='sb-owner'>Proje Sahibi: <span>Merve Havuz</span></div>
-        </div>
-    """, unsafe_allow_html=True)
+if sb_action == "new":
+    new_chat()
+    st.query_params.clear()
+    st.rerun()
+elif sb_action == "load" and sb_cid:
+    load_chat(sb_cid)
+    st.query_params.clear()
+    st.rerun()
 
-    if st.button("＋ Yeni Analiz Oluştur", type="primary", use_container_width=True):
-        st.session_state.current_chat_id = datetime.now().strftime("%Y%m%d_%H%M%S")
-        st.session_state.messages = []
-        st.session_state.chat_session = model.start_chat(history=[])
-        st.session_state.queued_prompt = ""
-        st.session_state.scroll_to_bottom = False
-        st.rerun()
+# ─────────────────────────────────────────
+# GLOBAL CSS
+# ─────────────────────────────────────────
+SB = 260   # sidebar genişliği — tek yerden yönetim
 
-    st.markdown("<hr style='border:none;border-top:0.5px solid #E5E7EB;margin:10px 0;'>", unsafe_allow_html=True)
+st.markdown(f"""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap');
 
-    t_db = load_db()
-    grouped = group_chats_by_date(t_db)
+*, *::before, *::after {{ box-sizing: border-box; }}
+html, body, .stApp {{
+    font-family: 'DM Sans', sans-serif !important;
+    background: #F8F7FF !important;
+    color: #18172B !important;
+}}
 
-    for group_name, cids in grouped.items():
+/* Streamlit chrome gizle */
+section[data-testid="stSidebar"]                 {{ display:none!important; }}
+header[data-testid="stHeader"]                   {{ display:none!important; }}
+[data-testid="stToolbar"]                        {{ display:none!important; }}
+[data-testid="stDeployButton"]                   {{ display:none!important; }}
+[data-testid="collapsedControl"]                 {{ display:none!important; }}
+[data-testid="stSidebarCollapsedControl"]        {{ display:none!important; }}
+button[data-testid="baseButton-headerNoPadding"] {{ display:none!important; }}
+.stAppDeployButton                               {{ display:none!important; }}
+footer                                           {{ display:none!important; }}
+[data-testid="stStatusWidget"]                   {{ display:none!important; }}
+
+/* Ana içerik alanı */
+[data-testid="stAppViewContainer"] > section.main {{
+    margin-left: {SB}px !important;
+}}
+
+/* block-container: ortalı, üstten sıkı, altta input+disclaimer için boşluk */
+.block-container {{
+    max-width: 740px !important;
+    margin: 0 auto !important;
+    padding: 0.5rem 2rem 170px 2rem !important;
+}}
+
+/* ── CUSTOM SIDEBAR ── */
+#custom-sidebar {{
+    position: fixed;
+    top: 0; left: 0;
+    width: {SB}px;
+    height: 100vh;
+    background: linear-gradient(160deg, #5B2FD9 0%, #7C3FFC 40%, #6A2EE8 100%);
+    box-shadow: 4px 0 32px rgba(124,63,252,0.35);
+    display: flex;
+    flex-direction: column;
+    z-index: 9999;
+    overflow: hidden;
+    font-family: 'DM Sans', sans-serif;
+}}
+.sb-header {{
+    padding: 22px 16px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+    flex-shrink: 0;
+}}
+.sb-badge {{
+    font-size: 0.58rem; font-weight: 700;
+    color: rgba(255,255,255,0.55);
+    text-transform: uppercase; letter-spacing: 0.13em;
+    line-height: 1.5; margin-bottom: 10px;
+}}
+.sb-botname {{
+    font-size: 1.25rem; font-weight: 800; color: #fff;
+    letter-spacing: -0.01em; line-height: 1.2; margin-bottom: 14px;
+}}
+.sb-profile {{
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+}}
+.sb-avatar {{
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    border: 2px solid rgba(255,255,255,0.5);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 800; color: #fff; flex-shrink: 0;
+}}
+.sb-name {{ font-size: 0.88rem; font-weight: 700; color: #fff; line-height: 1.2; }}
+.sb-role {{ font-size: 0.65rem; color: rgba(255,255,255,0.65); margin-top: 2px; }}
+
+.sb-new-wrap {{ padding: 14px 12px 10px; flex-shrink: 0; }}
+.sb-new-btn {{
+    width: 100%; padding: 10px 0;
+    background: linear-gradient(135deg, #C47FFF 0%, #A040FF 50%, #8A1FFF 100%);
+    border: none; border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700; font-size: 0.84rem; color: #fff;
+    cursor: pointer; letter-spacing: 0.01em;
+    box-shadow: 0 0 0 1px rgba(196,127,255,0.4),
+                0 4px 20px rgba(160,64,255,0.7),
+                0 0 40px rgba(160,64,255,0.35);
+    transition: all .2s ease;
+}}
+.sb-new-btn:hover {{
+    background: linear-gradient(135deg, #D490FF 0%, #B050FF 50%, #9A30FF 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 0 0 1px rgba(212,144,255,0.5),
+                0 6px 28px rgba(160,64,255,0.85),
+                0 0 60px rgba(160,64,255,0.5);
+}}
+.sb-divider {{ height: 1px; background: rgba(255,255,255,0.15); margin: 0 12px 4px; flex-shrink: 0; }}
+.sb-history {{ flex: 1 1 auto; overflow-y: auto; padding-bottom: 16px; }}
+.sb-history::-webkit-scrollbar {{ width: 4px; }}
+.sb-history::-webkit-scrollbar-thumb {{ background: rgba(255,255,255,0.25); border-radius: 4px; }}
+.sb-group-label {{
+    display: block; font-size: 0.56rem; font-weight: 700;
+    color: rgba(255,255,255,0.45); text-transform: uppercase;
+    letter-spacing: 0.1em; padding: 10px 14px 2px;
+}}
+.sb-chat-btn {{
+    display: block; width: 100%; text-align: left;
+    background: transparent; border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 0.76rem;
+    color: rgba(237,233,255,0.75); border-radius: 6px;
+    padding: 6px 12px; cursor: pointer;
+    transition: all .15s ease;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}}
+.sb-chat-btn:hover {{ background: rgba(255,255,255,0.12); color: #fff; }}
+.sb-chat-btn.sb-active {{
+    background: rgba(255,255,255,0.18); color: #fff; font-weight: 600;
+    border-left: 2px solid rgba(255,255,255,0.9);
+    border-radius: 0 6px 6px 0; padding-left: 10px;
+}}
+.sb-empty {{
+    padding: 20px 14px; text-align: center;
+    color: rgba(255,255,255,0.35); font-size: 0.72rem; line-height: 1.6;
+}}
+
+/* ── Chat messages ── */
+[data-testid="stChatMessage"] {{ background: transparent !important; padding: 0.3rem 0 !important; }}
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"])
+    [data-testid="stMarkdownContainer"] {{
+    background: #7C5CFC !important; color: #fff !important;
+    border-radius: 16px 16px 4px 16px !important; padding: 11px 16px !important;
+    box-shadow: 0 2px 10px rgba(124,92,252,.28) !important;
+}}
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"])
+    [data-testid="stMarkdownContainer"] p,
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"])
+    [data-testid="stMarkdownContainer"] li {{ color: #fff !important; }}
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"])
+    [data-testid="stMarkdownContainer"] {{
+    background: #fff !important; color: #18172B !important;
+    border: 1px solid #E4E0FF !important; border-radius: 4px 16px 16px 16px !important;
+    padding: 13px 18px !important; box-shadow: 0 1px 6px rgba(80,70,180,.07) !important;
+}}
+
+/* ── Welcome ekranı ── */
+.wlc-title {{
+    font-size: 2rem; font-weight: 700; color: #18172B;
+    text-align: center; margin: 1rem 0 0.3rem; letter-spacing: -0.02em;
+}}
+.wlc-sub {{ text-align: center; color: #6B6890; font-size: 0.86rem; margin-bottom: 1.2rem; }}
+
+/* Kart wrapper: kartın üstüne invisible Streamlit butonu bindiriliyor */
+.card-outer {{
+    position: relative;
+    margin-bottom: 10px;
+}}
+.sug-card {{
+    background: #fff;
+    border: 1.5px solid #E4E0FF;
+    border-radius: 12px;
+    padding: 12px 14px;
+    pointer-events: none;   /* tıklamayı üstteki butona bırak */
+}}
+.sug-icon  {{ font-size: 1.1rem; margin-bottom: 4px; }}
+.sug-title {{ font-size: 0.82rem; font-weight: 600; color: #18172B; line-height: 1.3; }}
+.sug-desc  {{ font-size: 0.69rem; color: #7B78A0; margin-top: 2px; line-height: 1.45; }}
+
+/* Kart üzerine binen Streamlit butonu: tamamen şeffaf ama tam boyut */
+.card-btn > div > button,
+.card-btn button {{
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: unset !important;
+    opacity: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 10 !important;
+}}
+
+/* chip butonları */
+.chip-row button {{
+    background: #fff !important; color: #5B3FD9 !important;
+    border: 1.5px solid #D4CFFF !important; border-radius: 100px !important;
+    padding: 5px 14px !important; font-size: 0.75rem !important; font-weight: 500 !important;
+}}
+.chip-row button:hover {{ background: #EDE9FF !important; border-color: #7C5CFC !important; }}
+
+.chat-topbar {{
+    display: flex; align-items: center; gap: 8px;
+    padding: 4px 0 14px; border-bottom: 1px solid #E4E0FF; margin-bottom: 10px;
+}}
+.chat-topbar-dot {{ width: 7px; height: 7px; background: #22D49A; border-radius: 50%; flex-shrink: 0; }}
+.chat-topbar-title {{ font-size: 0.83rem; font-weight: 500; color: #18172B; }}
+
+/* ── Chat input + disclaimer sabit alt bar ── */
+[data-testid="stBottom"],
+[data-testid="stBottomBlockContainer"] {{
+    position: fixed !important;
+    bottom: 0 !important;
+    left: {SB}px !important;
+    right: 0 !important;
+    background: #F8F7FF !important;
+    border-top: 1px solid #E4E0FF !important;
+    /* üstten disclaimer yazısı için padding bırak */
+    padding: 0 !important;
+    z-index: 999 !important;
+    display: flex !important;
+    flex-direction: column !important;
+}}
+/* Disclaimer: input'un hemen üstünde, bar içinde */
+[data-testid="stBottomBlockContainer"]::before {{
+    content: "⚠️ Bu platform hukuki tavsiye niteliği taşımamaktadır. Yalnızca genel rehberlik amaçlıdır. Hukuki süreçler için bir avukana danışmanız önerilir.";
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.58rem;
+    color: #A8A5C8;
+    text-align: center;
+    padding: 5px 24px 2px;
+    line-height: 1.4;
+}}
+[data-testid="stBottomBlockContainer"] .block-container {{
+    max-width: 740px !important;
+    padding: 6px 24px 10px !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+}}
+[data-testid="stChatInput"] {{
+    background: #fff !important;
+    border: 1.5px solid #D4CFFF !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 14px rgba(90,75,200,.08) !important;
+    padding: 2px 6px 2px 14px !important;
+}}
+[data-testid="stChatInput"]:focus-within {{
+    border-color: #7C5CFC !important;
+    box-shadow: 0 2px 20px rgba(124,92,252,.16) !important;
+}}
+[data-testid="stChatInput"] textarea {{
+    background: transparent !important; border: none !important;
+    outline: none !important; box-shadow: none !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.85rem !important; color: #18172B !important;
+    padding: 8px 0 !important; resize: none !important;
+}}
+[data-testid="stChatInput"] textarea::placeholder {{ color: #AAA7CC !important; }}
+[data-testid="stChatInput"] button {{
+    background: linear-gradient(135deg, #7C5CFC, #5038C8) !important;
+    border: none !important; border-radius: 8px !important;
+    width: 34px !important; min-width: 34px !important; height: 34px !important;
+    box-shadow: 0 2px 8px rgba(90,75,200,.35) !important; color: #fff !important;
+}}
+[data-testid="stChatInput"] button:hover {{
+    background: linear-gradient(135deg, #8F70FF, #6348E0) !important;
+}}
+[data-testid="stChatInput"] button svg {{ fill: #fff !important; stroke: #fff !important; }}
+</style>
+""", unsafe_allow_html=True)
+
+# ─────────────────────────────────────────
+# CUSTOM SIDEBAR
+# ─────────────────────────────────────────
+db_sb      = load_db()
+grouped    = group_by_date(db_sb)
+current_id = st.session_state.chat_id
+
+history_html = ""
+has_history  = any(cids for cids in grouped.values())
+
+if not has_history:
+    history_html = "<div class='sb-empty'>Henüz geçmiş analiz yok.<br>Yeni bir analiz başlatın.</div>"
+else:
+    for grp, cids in grouped.items():
         if not cids:
             continue
-        st.markdown(f"<div class='sb-section-label'>{group_name}</div>", unsafe_allow_html=True)
-
+        history_html += f"<span class='sb-group-label'>{grp}</span>"
         for cid in cids:
-            is_active = cid == st.session_state.current_chat_id
-            title = (t_db[cid][0].get("title") or t_db[cid][0]["content"][:22]) if t_db[cid] else "Analiz"
-            active_cls = "history-btn-active" if is_active else "history-btn"
+            msgs_s   = db_sb.get(cid, [])
+            lbl      = (msgs_s[0].get("title") or msgs_s[0]["content"][:22] + "…") if msgs_s else "Analiz"
+            lbl_safe = lbl.replace("'", "\\'").replace('"', "&quot;")
+            active   = "sb-active" if cid == current_id else ""
+            history_html += (
+                f"<button class='sb-chat-btn {active}' "
+                f"onclick=\"goLoad('{cid}')\">💬 {lbl_safe}</button>"
+            )
 
-            st.markdown(f"<div class='{active_cls}'>", unsafe_allow_html=True)
-            if st.button(title, key=f"ch_{cid}", use_container_width=True):
-                st.session_state.current_chat_id = cid
-                st.session_state.messages = t_db[cid]
-                history_for_ai = []
-                for m in t_db[cid]:
-                    r = "user" if m["role"] == "user" else "model"
-                    history_for_ai.append({"role": r, "parts": [m["content"]]})
-                st.session_state.chat_session = model.start_chat(history=history_for_ai)
-                st.session_state.queued_prompt = ""
-                st.session_state.scroll_to_bottom = False
-                st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
+st.markdown(f"""
+<div id="custom-sidebar">
+  <div class="sb-header">
+    <div class="sb-badge">Bilişim Güvenliği Teknolojisi<br>Bitirme Projesi</div>
+    <div class="sb-botname">⚖️ Siber Hukuk Botu</div>
+    <div class="sb-profile">
+      <div class="sb-avatar">MH</div>
+      <div>
+        <div class="sb-name">Merve Havuz</div>
+        <div class="sb-role">Proje Sahibi</div>
+      </div>
+    </div>
+  </div>
+  <div class="sb-new-wrap">
+    <button class="sb-new-btn" onclick="goNew()">＋&nbsp;&nbsp;Yeni Analiz</button>
+  </div>
+  <div class="sb-divider"></div>
+  <div class="sb-history">{history_html}</div>
+</div>
 
-# ==========================================
-# 8. ANA EKRAN & AI YÜRÜTME
-# ==========================================
-chat_active = bool(st.session_state.messages) or bool(st.session_state.queued_prompt)
+<script>
+function goNew() {{
+    var u = new URL(window.location.href);
+    u.searchParams.set('sb_action', 'new');
+    u.searchParams.delete('sb_cid');
+    window.location.href = u.toString();
+}}
+function goLoad(cid) {{
+    var u = new URL(window.location.href);
+    u.searchParams.set('sb_action', 'load');
+    u.searchParams.set('sb_cid', cid);
+    window.location.href = u.toString();
+}}
+</script>
+""", unsafe_allow_html=True)
 
-if chat_active:
-    if st.session_state.messages:
-        current_title = st.session_state.messages[0].get("title", st.session_state.messages[0]["content"][:35] + "…")
-    else:
-        current_title = st.session_state.queued_prompt[:35] + "…"
+# ─────────────────────────────────────────
+# ANA ALAN
+# ─────────────────────────────────────────
+pending = st.session_state.queued
+if pending:
+    st.session_state.queued = ""
 
-    st.markdown(f"""
-        <div class='topbar'>
-            <span class='status-dot'></span>
-            <span class='topbar-title'>{current_title}</span>
-        </div>
-    """, unsafe_allow_html=True)
+in_chat = bool(st.session_state.messages) or bool(pending)
 
-    for i, msg in enumerate(st.session_state.messages):
-        with st.chat_message(msg["role"], avatar="👤" if msg["role"] == "user" else "⚖️"):
-            marker = "<div class='usr-msg'></div>" if msg["role"] == "user" else "<div class='ast-msg'></div>"
-            st.markdown(marker + msg["content"], unsafe_allow_html=True)
+if not in_chat:
+    st.markdown('<h1 class="wlc-title">⚖️ Siber Hukuk Portalı</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="wlc-sub">Hukuki vakayı veya dijital haklarınızı yazın, analiz edelim.</p>', unsafe_allow_html=True)
 
-    if st.session_state.queued_prompt:
-        prompt = st.session_state.queued_prompt
-        st.session_state.queued_prompt = ""
-
-        with st.chat_message("user", avatar="👤"):
-            st.markdown("<div class='usr-msg'></div>" + prompt, unsafe_allow_html=True)
-
-        st.session_state.messages.append({"role": "user", "content": prompt})
-
-        with st.chat_message("assistant", avatar="⚖️"):
-            placeholder = st.empty()
-            placeholder.markdown("<div class='ast-msg'></div>" + """
-                <div style='color:#94A3B8;font-size:0.85rem;padding:4px 0;'>
-                    ⚖️ &nbsp;Analiz ediliyor...
-                </div>
-            """, unsafe_allow_html=True)
-
-            try:
-                full_prompt = f"{SISTEM_PROMPTU}\n\nKullanıcı Sorusu: {prompt}"
-                response = st.session_state.chat_session.send_message(full_prompt, stream=True)
-                full_res = ""
-                for chunk in response:
-                    full_res += chunk.text
-                    placeholder.markdown("<div class='ast-msg'></div>" + full_res + "▌", unsafe_allow_html=True)
-
-                placeholder.markdown("<div class='ast-msg'></div>" + full_res, unsafe_allow_html=True)
-
-                if len(st.session_state.messages) == 1:
-                    st.session_state.messages[0]["title"] = prompt[:25]
-
-                st.session_state.messages.append({"role": "assistant", "content": full_res})
-                fresh_db = load_db()
-                fresh_db[st.session_state.current_chat_id] = st.session_state.messages
-                save_db(fresh_db)
-                st.session_state.scroll_to_bottom = True
-
-            except Exception as e:
-                placeholder.markdown("")
-                st.error(f"⚠️ API Hatası Detayı: {e}")
-                st.session_state.messages.pop()
-
-        st.rerun()
-
-    st.markdown("<div id='scroll-bottom'></div>", unsafe_allow_html=True)
-    if st.session_state.scroll_to_bottom:
-        scroll_to_bottom()
-        st.session_state.scroll_to_bottom = False
-
-else:
-    st.markdown('<h1 class="portal-title">⚖️ Siber Hukuk Portalı</h1>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align:center;color:#64748B;margin-bottom:1rem;font-size:0.88rem;">Hukuki vakayı veya dijital haklarınızı yazın.</p>', unsafe_allow_html=True)
-
-    welcome_items = [
+    CARDS = [
         ("🔒", "KVKK İhlali",        "Kişisel veri ihlali durumunda ne yapmalıyım?"),
         ("💻", "Siber Saldırı",       "Sisteme izinsiz erişimde hukuki adımlar nelerdir?"),
         ("📱", "Sosyal Medya Hukuku", "İnternette hakaret ve iftira davası nasıl açılır?"),
         ("🏛️", "Şikayet Dilekçesi",  "BTK'ya şikayet dilekçesi nasıl hazırlanır?"),
     ]
 
-    col_a, col_b = st.columns(2)
-    for idx, (icon, title, desc) in enumerate(welcome_items):
-        col = col_a if idx % 2 == 0 else col_b
+    c1, c2 = st.columns(2, gap="small")
+    for i, (icon, title, desc) in enumerate(CARDS):
+        col = c1 if i % 2 == 0 else c2
         with col:
+            # card-outer: relative konteynır — kart + üzerine binen buton
             st.markdown(f"""
-                <div class='welcome-card'>
-                    <span class='welcome-card-icon'>{icon}</span>
-                    <div class='welcome-card-title'>{title}</div>
-                    <div class='welcome-card-desc'>{desc}</div>
-                </div>
+            <div class="card-outer">
+              <div class="sug-card">
+                <div class="sug-icon">{icon}</div>
+                <div class="sug-title">{title}</div>
+                <div class="sug-desc">{desc}</div>
+              </div>
             """, unsafe_allow_html=True)
-            st.markdown("<div class='card-trigger'>", unsafe_allow_html=True)
-            if st.button(f"▸ {title}", key=f"wcard_{idx}"):
-                st.session_state.queued_prompt = desc
+            # Streamlit butonu card-outer içine absolute konumlanıyor
+            st.markdown("<div class='card-btn'>", unsafe_allow_html=True)
+            if st.button(title, key=f"card_{i}"):
+                st.session_state.queued = desc
                 st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)  # card-outer kapat
 
-    st.markdown("<div style='height:0.4rem'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
 
-    chips = [
-        ("📄 Dilekçe oluştur",  "Siber suç için resmi dilekçe oluşturmama yardım et."),
-        ("⏱ Başvuru süresi?",   "Siber suçlarda başvuru ve dava açma süreleri nedir?"),
-        ("💰 Ceza miktarı?",    "Siber suçlarda öngörülen ceza miktarları nedir?"),
-        ("🔍 Kanun maddeleri",  "Türkiye'de siber suçlarla ilgili kanun maddeleri nelerdir?"),
+    CHIPS = [
+        ("📄 Dilekçe", "Siber suç için resmi dilekçe oluşturmama yardım et."),
+        ("⏱ Süre?",   "Siber suçlarda başvuru ve dava açma süreleri nedir?"),
+        ("💰 Ceza?",  "Siber suçlarda öngörülen ceza miktarları nedir?"),
+        ("🔍 Kanun",  "Türkiye'de siber suçlarla ilgili kanun maddeleri nelerdir?"),
     ]
-    st.markdown("<div class='chip-wrap'>", unsafe_allow_html=True)
-    chip_cols = st.columns(len(chips))
-    for col, (label, question) in zip(chip_cols, chips):
+    st.markdown("<div class='chip-row'>", unsafe_allow_html=True)
+    for col, (label, question) in zip(st.columns(len(CHIPS), gap="small"), CHIPS):
         with col:
             if st.button(label, key=f"chip_{label}"):
-                st.session_state.queued_prompt = question
+                st.session_state.queued = question
                 st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
 
-# ==========================================
-# 9. SOHBET GİRDİSİ (Alt Çubuk)
-# ==========================================
-if prompt := st.chat_input("Hukuki vakayı buraya yazın..."):
-    st.session_state.queued_prompt = prompt
-    st.rerun()
+else:
+    if st.session_state.messages:
+        ttl = st.session_state.messages[0].get(
+            "title", st.session_state.messages[0]["content"][:50] + "…"
+        )
+    else:
+        ttl = (pending[:50] + "…") if pending else "Yeni Analiz"
 
-st.markdown("""
-    <div class='disclaimer'>
-        ⚠️ Bu platform hukuki tavsiye niteliği taşımamaktadır. Bilgiler yalnızca genel rehberlik amaçlıdır. Hukuki süreçler için bir avukana danışmanız önerilir.
-    </div>
-""", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="chat-topbar">
+        <span class="chat-topbar-dot"></span>
+        <span class="chat-topbar-title">{ttl}</span>
+    </div>""", unsafe_allow_html=True)
+
+    for msg in st.session_state.messages:
+        with st.chat_message(msg["role"], avatar="👤" if msg["role"] == "user" else "⚖️"):
+            st.markdown(msg["content"])
+
+    if pending:
+        process_message(pending)
+
+# ─────────────────────────────────────────
+# CHAT INPUT
+# ─────────────────────────────────────────
+if new_input := st.chat_input("Hukuki vakayı buraya yazın..."):
+    if not in_chat:
+        st.session_state.queued = new_input
+        st.rerun()
+    else:
+        process_message(new_input)
